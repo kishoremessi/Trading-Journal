@@ -106,7 +106,7 @@ function ExpectancyBanner({ stats, year, month, filteredTrades }: {
           { label: 'Profit Factor', val: stats.profitFactor.toFixed(2), color: stats.profitFactor >= 1.5 ? 'text-green-600' : 'text-amber-600' },
         ].map(m => (
           <div key={m.label}>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider">{m.label}</p>
+            <p className="text-[10px] uppercase tracking-wider text-[#01060f]">{m.label}</p>
             <p className={`text-base font-bold font-mono mt-0.5 ${m.color}`}>{m.val}</p>
           </div>
         ))}
