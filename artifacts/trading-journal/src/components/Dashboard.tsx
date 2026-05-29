@@ -286,52 +286,50 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
       </div>
 
       {/* ── Equity + peak chart ── */}
-      <div className="px-2 pt-1 pb-0 bg-white" style={{ height: 260 }}>
+      <div className="px-3 pt-3 pb-2 bg-white" style={{ height: 320 }}>
         {chartData.length > 1 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={{ top: 14, right: 16, left: 0, bottom: 0 }} style={{ background: '#ffffff' }}>
+            <ComposedChart data={chartData} margin={{ top: 20, right: 20, left: 4, bottom: 8 }} style={{ background: '#ffffff' }}>
               <defs>
                 <linearGradient id="posGrad2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#16a34a" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#16a34a" stopOpacity={0.02} />
+                  <stop offset="0%"   stopColor="#22c55e" stopOpacity={0.35} />
+                  <stop offset="50%"  stopColor="#22c55e" stopOpacity={0.08} />
+                  <stop offset="100%" stopColor="#22c55e" stopOpacity={0.01} />
                 </linearGradient>
                 <linearGradient id="negGrad2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#dc2626" stopOpacity={0.02} />
-                  <stop offset="95%" stopColor="#dc2626" stopOpacity={0.22} />
+                  <stop offset="0%"   stopColor="#ef4444" stopOpacity={0.01} />
+                  <stop offset="50%"  stopColor="#ef4444" stopOpacity={0.08} />
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.30} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" vertical={false} />
               <XAxis dataKey="name" tickFormatter={xTickFormatter} ticks={xTickValues}
-                tick={{ fontSize: 11, fill: '#6b7280' }} tickLine={false} axisLine={false} interval={0} angle={-30} textAnchor="end" height={50} />
-              <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} tickLine={false} axisLine={false}
+                tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 500 }} tickLine={false} axisLine={false} interval={0} angle={-30} textAnchor="end" height={55} />
+              <YAxis tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 500 }} tickLine={false} axisLine={false}
                 tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} width={56} />
-              <ReferenceLine y={0} stroke="#d1d5db" strokeDasharray="4 2" strokeWidth={1.5} />
+              <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="6 3" strokeWidth={1} />
               <Tooltip content={<EquityTooltip />} />
 
-              {/* Running peak dashed line */}
-              <Line type="monotone" dataKey="peak" stroke="#d1d5db" strokeWidth={1.5}
-                strokeDasharray="5 3" dot={false} activeDot={false} />
+              <Line type="monotone" dataKey="peak" stroke="#cbd5e1" strokeWidth={1.5}
+                strokeDasharray="6 4" dot={false} activeDot={false} />
 
-              {/* Equity fill areas */}
-              <Area type="monotone" dataKey="pos" stroke="#16a34a" strokeWidth={2.5}
+              <Area type="monotone" dataKey="pos" stroke="#22c55e" strokeWidth={3}
                 fill="url(#posGrad2)" dot={false}
-                activeDot={{ r: 4, fill: '#16a34a', strokeWidth: 0 }} animationDuration={600} />
-              <Area type="monotone" dataKey="neg" stroke="#dc2626" strokeWidth={2.5}
+                activeDot={{ r: 5, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }} animationDuration={800} />
+              <Area type="monotone" dataKey="neg" stroke="#ef4444" strokeWidth={3}
                 fill="url(#negGrad2)" dot={false}
-                activeDot={{ r: 4, fill: '#dc2626', strokeWidth: 0 }} animationDuration={600} />
+                activeDot={{ r: 5, fill: '#ef4444', stroke: '#fff', strokeWidth: 2 }} animationDuration={800} />
 
-              {/* All-time high dot */}
               {bestPoint && bestPoint.equity > 0 && (
-                <ReferenceDot x={bestPoint.name} y={bestPoint.equity} r={5}
-                  fill="#16a34a" stroke="#fff" strokeWidth={2}
-                  label={{ value: `▲ ${fmtK(bestPoint.equity)}`, position: 'top', fontSize: 10, fill: '#16a34a', fontWeight: 700 }} />
+                <ReferenceDot x={bestPoint.name} y={bestPoint.equity} r={7}
+                  fill="#22c55e" stroke="#fff" strokeWidth={3}
+                  label={{ value: `▲ ${fmtK(bestPoint.equity)}`, position: 'top', fontSize: 11, fill: '#15803d', fontWeight: 800 }} />
               )}
 
-              {/* Max drawdown dot */}
               {worstPoint && worstPoint.equity < 0 && worstIdx !== bestIdx && (
-                <ReferenceDot x={worstPoint.name} y={worstPoint.equity} r={5}
-                  fill="#dc2626" stroke="#fff" strokeWidth={2}
-                  label={{ value: `▼ ${fmtK(worstPoint.equity)}`, position: 'bottom', fontSize: 10, fill: '#dc2626', fontWeight: 700 }} />
+                <ReferenceDot x={worstPoint.name} y={worstPoint.equity} r={7}
+                  fill="#ef4444" stroke="#fff" strokeWidth={3}
+                  label={{ value: `▼ ${fmtK(worstPoint.equity)}`, position: 'bottom', fontSize: 11, fill: '#b91c1c', fontWeight: 800 }} />
               )}
             </ComposedChart>
           </ResponsiveContainer>
@@ -342,27 +340,6 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
         )}
       </div>
 
-      {/* ── Daily P&L pulse bars ── */}
-      {dayBarData.length > 1 && (
-        <div className="px-2 pb-3 border-t border-gray-50 mt-1 bg-white">
-          <p className="text-[9px] text-gray-400 uppercase tracking-widest px-3 pt-2 pb-0.5">Daily P&amp;L Pulse</p>
-          <div className="bg-white" style={{ height: 60 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dayBarData} margin={{ top: 2, right: 16, left: 0, bottom: 0 }} barCategoryGap="15%" style={{ background: '#ffffff' }}>
-                <XAxis dataKey="date" hide />
-                <YAxis hide />
-                <ReferenceLine y={0} stroke="#e5e7eb" strokeWidth={1} />
-                <Tooltip content={<DayTooltip />} />
-                <Bar dataKey="pnl" radius={[2, 2, 0, 0]} maxBarSize={10}>
-                  {dayBarData.map((entry, i) => (
-                    <Cell key={i} fill={entry.pnl >= 0 ? '#16a34a' : '#dc2626'} fillOpacity={0.7} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
