@@ -396,7 +396,7 @@ function GroupCard({ g, rank }: { g: InstrumentGroup; rank: number }) {
           <span className="text-base">{medal ?? <span className="text-xs font-bold text-gray-500 bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center">#{rank + 1}</span>}</span>
           <div>
             <p className="text-sm font-bold text-gray-900">{g.name}</p>
-            <p className="text-[10px] text-gray-400">{g.trades} trades · {g.wins}W / {g.trades - g.wins}L</p>
+            <p className="text-[15px] text-justify text-[#073ef2ed]">{g.trades} trades · {g.wins}W / {g.trades - g.wins}L</p>
           </div>
         </div>
         <div className="text-right">
