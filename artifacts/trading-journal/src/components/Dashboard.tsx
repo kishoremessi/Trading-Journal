@@ -720,9 +720,9 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center text-center">
         <h3 className="text-sm font-semibold text-gray-900">Monthly Breakdown</h3>
-        <span className="text-[10px] text-gray-400">{rows.length} months · most recent first</span>
+        <span className="text-[10px] text-[#000205]">{rows.length} months · most recent first</span>
       </div>
       <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-0 text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-5 py-2 border-b border-gray-100 bg-gray-50/60">
         <span>Month</span>

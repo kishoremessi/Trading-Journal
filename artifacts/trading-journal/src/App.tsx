@@ -146,9 +146,7 @@ function AppContent() {
               const Icon = t.icon;
               return (
                 <button key={t.id} onClick={() => setTab(t.id)} data-testid={`tab-${t.id}`}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                    tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-                  }`}>
+                  className="flex gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-card shadow-sm justify-center items-center text-[#00040d]">
                   <Icon className="w-3.5 h-3.5" />{t.label}
                 </button>
               );
