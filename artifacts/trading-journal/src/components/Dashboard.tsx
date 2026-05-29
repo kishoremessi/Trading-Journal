@@ -528,7 +528,7 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
       </div>
       {/* Lot Size Calculator */}
       <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <div className="flex flex-wrap mb-4 justify-between items-start gap-[50px]">
           <div>
             <p className="text-sm font-semibold text-gray-900">Lot Size Calculator</p>
             <p className="text-xs text-gray-400 mt-0.5">₹50,000 capital required per lot · based on historical data</p>
@@ -538,7 +538,7 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
             <input
               type="number" min="1" max="100" value={lotInput}
               onChange={e => setLotInput(e.target.value)}
-              className="w-20 text-center border border-gray-300 rounded-lg px-2 py-1.5 text-sm font-bold font-mono text-blue-700 outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition-all"
+              className="w-20 text-center border border-gray-300 rounded-lg px-2 py-1.5 text-sm font-bold font-mono text-blue-700 outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition-all pt-[8px] pb-[8px] pl-[6px] pr-[6px] bg-[#e6e6edcf] border-t-[#f0f4fa] border-r-[#f0f4fa] border-b-[#f0f4fa] border-l-[#f0f4fa] ml-[5px] mr-[5px] mt-[5px] mb-[5px]"
             />
           </div>
         </div>
