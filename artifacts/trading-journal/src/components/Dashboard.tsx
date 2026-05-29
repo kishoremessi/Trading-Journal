@@ -186,19 +186,25 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
     return { bestIdx, worstIdx };
   }, [chartData]);
 
-  /* month label ticks */
-  const monthLabelSet = useMemo(() => {
-    const seen = new Set<number>(), result = new Set<string>();
+  /* month label ticks — show one tick per unique month/year */
+  const xTickValues = useMemo(() => {
+    const seen = new Set<string>();
+    const ticks: string[] = [];
     for (const d of chartData) {
-      try { const m = new Date(d.name).getMonth(); if (!seen.has(m)) { seen.add(m); result.add(d.name); } }
-      catch { /* skip */ }
+      try {
+        const dt = new Date(d.name);
+        const key = `${dt.getFullYear()}-${dt.getMonth()}`;
+        if (!seen.has(key)) { seen.add(key); ticks.push(d.name); }
+      } catch { /* skip */ }
     }
-    return result;
+    return ticks;
   }, [chartData]);
 
   const xTickFormatter = (val: string) => {
-    if (!monthLabelSet.has(val)) return '';
-    try { return MONTH_SHORT[new Date(val).getMonth()] ?? ''; } catch { return ''; }
+    try {
+      const d = new Date(val);
+      return `${MONTH_SHORT[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`;
+    } catch { return ''; }
   };
 
   const monthlyGrowthEst = trades.length > 0
@@ -280,10 +286,10 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
       </div>
 
       {/* ── Equity + peak chart ── */}
-      <div className="px-2 pt-1 pb-0" style={{ height: 260 }}>
+      <div className="px-2 pt-1 pb-0 bg-white" style={{ height: 260 }}>
         {chartData.length > 1 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={{ top: 14, right: 16, left: 0, bottom: 0 }}>
+            <ComposedChart data={chartData} margin={{ top: 14, right: 16, left: 0, bottom: 0 }} style={{ background: '#ffffff' }}>
               <defs>
                 <linearGradient id="posGrad2" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#16a34a" stopOpacity={0.25} />
@@ -295,8 +301,8 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="name" tickFormatter={xTickFormatter}
-                tick={{ fontSize: 11, fill: '#6b7280' }} tickLine={false} axisLine={false} interval={0} />
+              <XAxis dataKey="name" tickFormatter={xTickFormatter} ticks={xTickValues}
+                tick={{ fontSize: 11, fill: '#6b7280' }} tickLine={false} axisLine={false} interval={0} angle={-30} textAnchor="end" height={50} />
               <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} tickLine={false} axisLine={false}
                 tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} width={56} />
               <ReferenceLine y={0} stroke="#d1d5db" strokeDasharray="4 2" strokeWidth={1.5} />
@@ -338,11 +344,11 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
 
       {/* ── Daily P&L pulse bars ── */}
       {dayBarData.length > 1 && (
-        <div className="px-2 pb-3 border-t border-gray-50 mt-1">
+        <div className="px-2 pb-3 border-t border-gray-50 mt-1 bg-white">
           <p className="text-[9px] text-gray-400 uppercase tracking-widest px-3 pt-2 pb-0.5">Daily P&amp;L Pulse</p>
-          <div style={{ height: 60 }}>
+          <div className="bg-white" style={{ height: 60 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dayBarData} margin={{ top: 2, right: 16, left: 0, bottom: 0 }} barCategoryGap="15%">
+              <BarChart data={dayBarData} margin={{ top: 2, right: 16, left: 0, bottom: 0 }} barCategoryGap="15%" style={{ background: '#ffffff' }}>
                 <XAxis dataKey="date" hide />
                 <YAxis hide />
                 <ReferenceLine y={0} stroke="#e5e7eb" strokeWidth={1} />
@@ -1143,21 +1149,21 @@ export function Dashboard({ trades: allTrades, historical2025 }: Props) {
             </div>
           )}
 
-          {filteredTrades.length >= 5 && (
-            <PredictiveIntelligence trades={filteredTrades} stats={stats} />
+          {allTrades.length >= 5 && (
+            <PredictiveIntelligence trades={allTrades} stats={stats} />
           )}
 
-          {filteredTrades.length >= 10 && (
+          {allTrades.length >= 10 && (
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-3">
                 Future Insights Engine
                 <span className="text-xs font-normal text-blue-500 border border-blue-200 bg-blue-50 px-2 py-0.5 rounded-full ml-2">AI</span>
               </h3>
-              <FutureInsights trades={filteredTrades} />
+              <FutureInsights trades={allTrades} />
             </div>
           )}
 
-          <AchievementsSystem trades={filteredTrades} />
+          <AchievementsSystem trades={allTrades} />
         </>
       )}
     </div>

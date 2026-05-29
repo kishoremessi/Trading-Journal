@@ -324,9 +324,9 @@ function SegmentBarChart({ segments }: { segments: SegmentStats[] }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
       <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Segment P&L Comparison</h3>
-      <div style={{ height: barHeight }}>
+      <div className="bg-white" style={{ height: barHeight }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
+          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, left: 0, bottom: 4 }} style={{ background: '#ffffff' }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} tickLine={false} axisLine={false}
               tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} />
