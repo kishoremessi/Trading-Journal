@@ -543,7 +543,7 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 mb-4 flex items-center gap-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 mb-4 flex text-center justify-center items-center gap-[20px] text-[18px]">
           <span className="text-blue-600 font-semibold text-sm">Capital Required:</span>
           <span className="text-blue-800 font-bold font-mono text-lg">₹{capital.toLocaleString('en-IN')}</span>
         </div>
