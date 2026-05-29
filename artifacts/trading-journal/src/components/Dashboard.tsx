@@ -515,7 +515,7 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
         </span>
       </div>
       {/* System Ratings — simplified */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap justify-center items-center gap-[50px] text-left">
         {systemRatings.map(r => (
           <div key={r.name} className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${r.color}`}>
             <div className="w-6 h-6 rounded-full bg-white/60 flex items-center justify-center text-xs font-bold">{r.score.toFixed(0)}</div>
