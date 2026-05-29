@@ -508,13 +508,12 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap text-[18px] justify-center items-start">
         <h3 className="text-sm font-semibold text-gray-900">Predictive Intelligence</h3>
         <span className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-0.5 rounded-full">
           {monthlyStats.length} months analysed
         </span>
       </div>
-
       {/* System Ratings — simplified */}
       <div className="flex flex-wrap gap-3">
         {systemRatings.map(r => (
@@ -527,7 +526,6 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
           </div>
         ))}
       </div>
-
       {/* Lot Size Calculator */}
       <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
