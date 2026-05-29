@@ -254,7 +254,7 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
           { label: 'Est. Monthly Growth', val: `${monthlyGrowthEst >= 0 ? '+' : ''}${monthlyGrowthEst.toFixed(1)}%`, color: monthlyGrowthEst >= 0 ? 'text-blue-600' : 'text-red-500' },
         ].map(m => (
           <div key={m.label}>
-            <p className="text-[10px] uppercase tracking-wider text-[#010712]">{m.label}</p>
+            <p className="uppercase tracking-wider text-[#010712] text-[13px]">{m.label}</p>
             <p className={`text-lg font-bold font-mono mt-0.5 ${m.color}`}>{m.val}</p>
           </div>
         ))}
