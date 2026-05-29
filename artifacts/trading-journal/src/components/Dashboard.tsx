@@ -608,12 +608,21 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
   const maxDD = (ddInfo.maxDrawdown / avgHistLots) * customLots;
   const maxDDPct = capital > 0 ? (maxDD / capital) * 100 : 0;
 
-  // Best / worst month: normalize per lot, scale to customLots
-  const bestRaw = predictive.bestMonth;
-  const worstRaw = predictive.worstMonth;
-  const bestPnl = bestRaw ? (bestRaw.pnl / getHistoricalLots(bestRaw.year, bestRaw.month)) * customLots : 0;
+  // Best / worst month: computed by per-lot normalized PnL, then scaled to customLots
+  const { bestMonth, worstMonth } = useMemo(() => {
+    if (!monthlyStats.length) return { bestMonth: null as MonthlyStats | null, worstMonth: null as MonthlyStats | null };
+    const withPerLot = monthlyStats.map(m => ({
+      m,
+      perLot: m.pnl / getHistoricalLots(m.year, m.month),
+    }));
+    const best = withPerLot.reduce((b, x) => x.perLot > b.perLot ? x : b, withPerLot[0]);
+    const worst = withPerLot.reduce((w, x) => x.perLot < w.perLot ? x : w, withPerLot[0]);
+    return { bestMonth: best.m, worstMonth: worst.m };
+  }, [monthlyStats]);
+
+  const bestPnl = bestMonth ? (bestMonth.pnl / getHistoricalLots(bestMonth.year, bestMonth.month)) * customLots : 0;
   const bestPct = capital > 0 ? (bestPnl / capital) * 100 : 0;
-  const worstPnl = worstRaw ? (worstRaw.pnl / getHistoricalLots(worstRaw.year, worstRaw.month)) * customLots : 0;
+  const worstPnl = worstMonth ? (worstMonth.pnl / getHistoricalLots(worstMonth.year, worstMonth.month)) * customLots : 0;
   const worstPct = capital > 0 ? (worstPnl / capital) * 100 : 0;
 
   const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -688,19 +697,19 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
           </div>
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5">
             <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">If Perform Good</p>
-            {predictive.bestMonth ? (
+            {bestMonth ? (
               <>
                 <p className="text-2xl font-bold font-mono text-emerald-600">{fmtK(bestPnl)}</p>
-                <p className="text-sm font-mono font-semibold text-emerald-500 mt-1">+{bestPct.toFixed(1)}% · {MONTH_LABELS[predictive.bestMonth.month]} {predictive.bestMonth.year}</p>
+                <p className="text-sm font-mono font-semibold text-emerald-500 mt-1">+{bestPct.toFixed(1)}% · {MONTH_LABELS[bestMonth.month]} {bestMonth.year}</p>
               </>
             ) : <p className="text-xl text-gray-400">—</p>}
           </div>
           <div className="bg-red-50 border border-red-200 rounded-xl p-3.5">
             <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">If Perform Worst</p>
-            {predictive.worstMonth ? (
+            {worstMonth ? (
               <>
                 <p className="text-2xl font-bold font-mono text-red-600">{fmtK(worstPnl)}</p>
-                <p className="text-sm font-mono font-semibold text-red-500 mt-1">{worstPct.toFixed(1)}% · {MONTH_LABELS[predictive.worstMonth.month]} {predictive.worstMonth.year}</p>
+                <p className="text-sm font-mono font-semibold text-red-500 mt-1">{worstPct.toFixed(1)}% · {MONTH_LABELS[worstMonth.month]} {worstMonth.year}</p>
               </>
             ) : <p className="text-xl text-gray-400">—</p>}
           </div>
