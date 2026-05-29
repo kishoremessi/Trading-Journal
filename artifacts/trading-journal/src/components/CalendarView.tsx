@@ -374,17 +374,12 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
                 const returnPct = hasData ? (pnl! / capital) * 100 : 0;
                 const streak = streakMap.get(dateStr) ?? 0;
                 const isOnFire = streak >= 3;
-                // Classify drawdown severity for color
-                const ddColor = isDayLoss
-                  ? Math.abs(returnPct) > 5 ? 'bg-red-100 border-2 border-red-300' : 'bg-red-50 border-2 border-red-200'
-                  : '';
-
                 const cellBg = isDayProfit
-                  ? 'bg-gradient-to-b from-green-50 to-green-100/60 border-2 border-green-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
+                  ? 'bg-gradient-to-b from-green-50 to-green-100/60 border border-gray-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
                   : isDayLoss
                     ? Math.abs(returnPct) > 5
-                      ? 'bg-gradient-to-b from-red-100/80 to-red-150/60 border-2 border-red-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]'
-                      : 'bg-gradient-to-b from-red-50 to-red-100/50 border-2 border-red-200/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]'
+                      ? 'bg-gradient-to-b from-red-100/80 to-red-150/60 border border-gray-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]'
+                      : 'bg-gradient-to-b from-red-50 to-red-100/50 border border-gray-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]'
                   : hasData
                     ? 'bg-gray-100 border border-gray-200'
                     : 'bg-gray-50/70 border border-gray-100';
@@ -426,9 +421,9 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
 
         {/* Legend */}
         <div className="flex items-center gap-4 justify-end pt-1">
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-green-100 border-2 border-green-300" /><span className="text-[10px] text-gray-400">Profit</span></div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-red-100 border-2 border-red-300" /><span className="text-[10px] text-gray-400">Loss</span></div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-orange-100 border-2 border-orange-300" /><span className="text-[10px] text-gray-400">Heavy Loss (&gt;5%)</span></div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-green-100 border border-gray-200" /><span className="text-[10px] text-gray-400">Profit</span></div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-red-100 border border-gray-200" /><span className="text-[10px] text-gray-400">Loss</span></div>
+          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-orange-100 border border-gray-200" /><span className="text-[10px] text-gray-400">Heavy Loss (&gt;5%)</span></div>
           <span className="text-[10px] text-gray-400 italic">Click day for details</span>
         </div>
       </div>
