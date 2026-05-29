@@ -244,7 +244,6 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-
       {/* ── Stats header ── */}
       <div className="flex flex-wrap gap-5 px-5 py-4 border-b border-gray-100">
         {[
@@ -260,7 +259,6 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
           </div>
         ))}
       </div>
-
       {/* ── Chart legend ── */}
       <div className="flex items-center gap-5 px-5 pt-3 pb-0">
         <div className="flex items-center gap-1.5">
@@ -284,9 +282,8 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
           </div>
         )}
       </div>
-
       {/* ── Equity + peak chart ── */}
-      <div className="px-3 pt-3 pb-2 bg-white" style={{ height: 320 }}>
+      <div className="px-3 pt-3 pb-2 bg-white text-left text-[#01070f]" style={{ height: 320 }}>
         {chartData.length > 1 ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 20, right: 20, left: 4, bottom: 8 }} style={{ background: '#ffffff' }}>
@@ -339,7 +336,6 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
           </div>
         )}
       </div>
-
     </div>
   );
 }
