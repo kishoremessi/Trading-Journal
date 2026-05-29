@@ -811,7 +811,6 @@ export function Dashboard({ trades: allTrades, historical2025 }: Props) {
     <div className="space-y-6">
       <ExpectancyBanner stats={stats} year={year} month={month} filteredTrades={filteredTrades} />
       <Filters allTrades={allTrades} year={year} month={month} onYearChange={handleYear} onMonthChange={handleMonth} />
-
       {filteredTrades.length > 0 ? (
         <EquityCurve trades={filteredTrades} />
       ) : (
@@ -819,11 +818,10 @@ export function Dashboard({ trades: allTrades, historical2025 }: Props) {
           No trades found for the selected period.
         </div>
       )}
-
       {filteredTrades.length > 0 && (
         <>
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Core Performance Metrics</h3>
+            <h3 className="font-semibold text-gray-900 mb-3 text-center text-[16px]">Core Performance Metrics</h3>
             <CoreMetrics stats={stats} trades={filteredTrades} />
           </div>
 
