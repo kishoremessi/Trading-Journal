@@ -131,99 +131,139 @@ function SegmentIntelCard({ seg, rank, trades: allTrades }: { seg: SegmentStats;
   );
 }
 
-/* ── Monthly Heatmap ──────────────────────────────────────────── */
-function MonthlyHeatmap({ trades }: { trades: Trade[] }) {
-  const { groups, months } = useMemo(() => {
-    const groupNames = ['Nifty CE', 'Nifty PE', 'Banknifty CE', 'Banknifty PE', 'Sensex CE', 'Sensex PE'];
+
+/* ── Segment × Month Heatmap (from Dashboard) ─────────────────── */
+function SegmentHeatmap({ trades }: { trades: Trade[] }) {
+  const { months, segments, cellMap, segTotals } = useMemo(() => {
     const monthSet = new Set<string>();
-    const data = new Map<string, Map<string, number>>();
-
+    const monthMeta = new Map<string, { year: number; month: number; label: string }>();
+    const segSet    = new Set<string>();
+    const cellMap   = new Map<string, number>();
+    const segTotals = new Map<string, number>();
     for (const t of trades) {
       const y = t.date.getFullYear(), m = t.date.getMonth();
-      const monthKey = `${MONTH_SHORT[m]} ${y}`;
-      const seg = t.segment;
-      let group = '';
-      const sl = seg.toLowerCase().replace(/\s/g, '');
-      if (sl.startsWith('banknifty')) group = sl.includes('ce') ? 'Banknifty CE' : 'Banknifty PE';
-      else if (sl.startsWith('nifty')) group = sl.includes('ce') ? 'Nifty CE' : 'Nifty PE';
-      else if (sl.startsWith('sensex')) group = sl.includes('ce') ? 'Sensex CE' : 'Sensex PE';
-      if (!group) continue;
-      monthSet.add(monthKey);
-      if (!data.has(group)) data.set(group, new Map());
-      const cur = data.get(group)!.get(monthKey) ?? 0;
-      data.get(group)!.set(monthKey, cur + t.actualProfit);
+      const mk = `${y}-${String(m).padStart(2, '0')}`;
+      monthSet.add(mk);
+      if (!monthMeta.has(mk)) monthMeta.set(mk, { year: y, month: m, label: `${MONTH_SHORT[m]} '${String(y).slice(2)}` });
+      segSet.add(t.segment);
+      const ck = `${t.segment}|${mk}`;
+      cellMap.set(ck, (cellMap.get(ck) ?? 0) + t.actualProfit);
+      segTotals.set(t.segment, (segTotals.get(t.segment) ?? 0) + t.actualProfit);
     }
-
-    const months = Array.from(monthSet).sort((a, b) => {
-      const [ma, ya] = a.split(' '); const [mb, yb] = b.split(' ');
-      return parseInt(ya) !== parseInt(yb) ? parseInt(ya) - parseInt(yb) : MONTH_SHORT.indexOf(ma) - MONTH_SHORT.indexOf(mb);
-    });
-
-    const groups = groupNames.filter(g => data.has(g));
-    return { groups, months, data };
+    const months   = [...monthSet].sort().map(k => ({ key: k, ...monthMeta.get(k)! }));
+    const segments = [...segSet].sort((a, b) => (segTotals.get(b) ?? 0) - (segTotals.get(a) ?? 0));
+    return { months, segments, cellMap, segTotals };
   }, [trades]);
 
-  if (!groups.length || !months.length) return null;
+  const maxAbs = useMemo(() => {
+    let max = 0;
+    for (const v of cellMap.values()) if (Math.abs(v) > max) max = Math.abs(v);
+    return max || 1;
+  }, [cellMap]);
 
-  const data = useMemo(() => {
-    const d = new Map<string, Map<string, number>>();
-    for (const t of trades) {
-      const y = t.date.getFullYear(), m = t.date.getMonth();
-      const monthKey = `${MONTH_SHORT[m]} ${y}`;
-      const seg = t.segment;
-      let group = '';
-      const sl = seg.toLowerCase().replace(/\s/g, '');
-      if (sl.startsWith('banknifty')) group = sl.includes('ce') ? 'Banknifty CE' : 'Banknifty PE';
-      else if (sl.startsWith('nifty')) group = sl.includes('ce') ? 'Nifty CE' : 'Nifty PE';
-      else if (sl.startsWith('sensex')) group = sl.includes('ce') ? 'Sensex CE' : 'Sensex PE';
-      if (!group) continue;
-      if (!d.has(group)) d.set(group, new Map());
-      const cur = d.get(group)!.get(monthKey) ?? 0;
-      d.get(group)!.set(monthKey, cur + t.actualProfit);
-    }
-    return d;
-  }, [trades]);
+  const cellCss = (pnl: number | undefined): { style: React.CSSProperties; textClass: string; borderColor: string } => {
+    if (pnl === undefined) return { style: { background: 'transparent' }, textClass: '', borderColor: 'transparent' };
+    const ratio = Math.min(1, Math.abs(pnl) / maxAbs);
+    const opacity = 0.06 + ratio * 0.22;
+    if (pnl > 0) return {
+      style: { background: `rgba(16,185,129,${opacity})` },
+      textClass: ratio > 0.55 ? 'text-emerald-800' : 'text-emerald-600',
+      borderColor: `rgba(16,185,129,${opacity + 0.15})`,
+    };
+    return {
+      style: { background: `rgba(251,113,133,${opacity})` },
+      textClass: ratio > 0.55 ? 'text-rose-800' : 'text-rose-500',
+      borderColor: `rgba(251,113,133,${opacity + 0.15})`,
+    };
+  };
+
+  const fmtCell = (v: number) =>
+    `${v >= 0 ? '+' : '-'}${Math.abs(v) >= 1000 ? `${(Math.abs(v) / 1000).toFixed(1)}K` : String(Math.abs(Math.round(v)))}`;
+
+  if (!segments.length || !months.length) return null;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-900">Monthly Performance Heatmap</h3>
-        <p className="text-xs text-gray-400 mt-0.5">Green = profitable month · Red = losing month</p>
+    <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+      <div className="px-5 py-4 bg-white border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Segment × Month</h3>
+          <p className="text-[10px] text-gray-400 mt-0.5">{segments.length} segments · {months.length} months · color intensity = P&amp;L size</p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-gray-400 mr-1">Loss</span>
+          {[0.08, 0.14, 0.2, 0.27].reverse().map(o => (
+            <div key={o} className="w-4 h-4 rounded border" style={{ background: `rgba(251,113,133,${o})`, borderColor: `rgba(251,113,133,${o + 0.15})` }} />
+          ))}
+          <div className="w-4 h-4 rounded bg-gray-50 border border-gray-200" />
+          {[0.08, 0.14, 0.2, 0.27].map(o => (
+            <div key={o} className="w-4 h-4 rounded border" style={{ background: `rgba(16,185,129,${o})`, borderColor: `rgba(16,185,129,${o + 0.15})` }} />
+          ))}
+          <span className="text-[10px] text-gray-400 ml-1">Profit</span>
+        </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+      <div className="overflow-x-auto bg-white">
+        <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="px-3 py-2 text-left text-[10px] text-gray-400 font-medium w-28">Segment</th>
-              {months.slice(-12).map(m => (
-                <th key={m} className="px-1 py-2 text-center text-[10px] text-gray-400 font-medium min-w-[52px]">{m}</th>
+            <tr>
+              <th className="sticky left-0 z-10 bg-white px-4 py-3 text-left min-w-[120px]">
+                <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Segment</span>
+              </th>
+              {months.map(m => (
+                <th key={m.key} className="px-1.5 py-3 min-w-[72px]">
+                  <span className="inline-flex items-center justify-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500 whitespace-nowrap">
+                    {m.label}
+                  </span>
+                </th>
               ))}
+              <th className="pl-3 pr-4 py-3 min-w-[88px]" style={{ borderLeft: '2px solid #e5e7eb' }}>
+                <span className="inline-flex items-center justify-center rounded-full bg-gray-900 px-3 py-0.5 text-[10px] font-bold text-white whitespace-nowrap tracking-wide">
+                  TOTAL
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {groups.map(group => (
-              <tr key={group} className="border-b border-gray-50">
-                <td className="px-3 py-2 text-[10px] font-semibold text-gray-600 whitespace-nowrap">{group}</td>
-                {months.slice(-12).map(m => {
-                  const pnl = data.get(group)?.get(m) ?? null;
-                  const isPos = pnl !== null && pnl > 0;
-                  const isNeg = pnl !== null && pnl < 0;
-                  return (
-                    <td key={m} className="px-1 py-1.5 text-center">
-                      {pnl !== null ? (
-                        <div className={`rounded-lg px-1 py-1.5 text-[9px] font-mono font-bold ${
-                          isPos ? 'bg-green-100 text-green-700' : isNeg ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-400'
-                        }`}>
-                          {pnl >= 0 ? '+' : ''}{(pnl/1000).toFixed(1)}K
-                        </div>
-                      ) : (
-                        <div className="rounded-lg px-1 py-1.5 bg-gray-50 text-gray-200 text-[9px] text-center">—</div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {segments.map((seg, ri) => {
+              const total  = segTotals.get(seg) ?? 0;
+              const isPos  = total >= 0;
+              return (
+                <tr key={seg} className={`group ${ri % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'} hover:bg-blue-50/30 transition-colors`}>
+                  <td className="sticky left-0 z-10 px-4 py-2" style={{ background: ri % 2 === 0 ? '#fff' : 'rgba(249,250,251,0.4)' }}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isPos ? 'bg-green-500' : 'bg-red-400'}`} />
+                      <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">{seg}</span>
+                    </div>
+                  </td>
+                  {months.map(m => {
+                    const pnl = cellMap.get(`${seg}|${m.key}`);
+                    const { style, textClass, borderColor } = cellCss(pnl);
+                    return (
+                      <td key={m.key} className="px-1 py-1.5 text-center"
+                        title={pnl !== undefined ? `${seg} · ${m.label}: ${fmtCell(pnl)}` : 'No trades'}>
+                        {pnl !== undefined ? (
+                          <div className="rounded-lg px-1.5 py-1.5 mx-0.5 border" style={{ ...style, borderColor }}>
+                            <span className={`text-[10px] font-bold font-mono whitespace-nowrap ${textClass}`}>
+                              {fmtCell(pnl)}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="rounded-lg px-1.5 py-1.5 mx-0.5">
+                            <span className="text-[10px] text-gray-200">·</span>
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="pl-3 pr-4 py-1.5 text-center" style={{ borderLeft: '2px solid #e5e7eb' }}>
+                    <div className={`rounded-xl px-2.5 py-2 ${isPos ? 'bg-gray-900' : 'bg-gray-800'}`}>
+                      <span className={`text-[11px] font-extrabold font-mono whitespace-nowrap ${isPos ? 'text-green-400' : 'text-red-400'}`}>
+                        {fmtCell(total)}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -454,14 +494,14 @@ export function Segments({ trades: allTrades }: Props) {
         </div>
       )}
 
-      {/* ── Monthly Heatmap ── */}
+      {/* ── Segment × Month Heatmap ── */}
       {filteredTrades.length > 0 && (
         <div>
           <div className="mb-3">
-            <h2 className="text-sm font-semibold text-gray-900">Monthly Heatmap</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Segment profitability by month — last 12 months shown</p>
+            <h2 className="text-sm font-semibold text-gray-900">Segment × Month</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Segment profitability by month — color intensity = P&L size</p>
           </div>
-          <MonthlyHeatmap trades={filteredTrades} />
+          <SegmentHeatmap trades={filteredTrades} />
         </div>
       )}
     </div>
