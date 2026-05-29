@@ -720,6 +720,107 @@ function AchievementsSystem({ trades }: { trades: Trade[] }) {
   );
 }
 
+/* ── Section 6: Monthly Breakdown Table ─────────────────────── */
+function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
+  const monthly = useMemo(() => calculateMonthlyStats(trades), [trades]);
+
+  // Compute best & worst day per month from raw trades
+  const dayStatsByMonth = useMemo(() => {
+    const dayMap = new Map<string, number>();
+    const perMonth = new Map<string, { best: number; worst: number }>();
+    for (const t of trades) {
+      const key = `${t.date.getFullYear()}-${t.date.getMonth()}`;
+      const day = t.dateStr;
+      dayMap.set(day, (dayMap.get(day) ?? 0) + t.actualProfit);
+    }
+    for (const t of trades) {
+      const key = `${t.date.getFullYear()}-${t.date.getMonth()}`;
+      const dayPnl = dayMap.get(t.dateStr) ?? 0;
+      const cur = perMonth.get(key) ?? { best: -Infinity, worst: Infinity };
+      perMonth.set(key, {
+        best:  Math.max(cur.best,  dayPnl),
+        worst: Math.min(cur.worst, dayPnl),
+      });
+    }
+    return perMonth;
+  }, [trades]);
+
+  const rows = [...monthly].reverse();
+  const maxAbsPnl = Math.max(...rows.map(r => Math.abs(r.pnl)), 1);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-900">Monthly Breakdown</h3>
+        <span className="text-[10px] text-gray-400">{rows.length} months · most recent first</span>
+      </div>
+      <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-0 text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-5 py-2 border-b border-gray-100 bg-gray-50/60">
+        <span>Month</span>
+        <span className="text-right">P&amp;L</span>
+        <span className="text-center">Win Rate</span>
+        <span className="text-right">Trades</span>
+        <span className="text-right">Best Day</span>
+        <span className="text-right">Worst Day</span>
+      </div>
+      <div className="divide-y divide-gray-50">
+        {rows.map(r => {
+          const key = `${r.year}-${r.month}`;
+          const ds = dayStatsByMonth.get(key);
+          const isProfit = r.pnl >= 0;
+          const barW = Math.round((Math.abs(r.pnl) / maxAbsPnl) * 100);
+          return (
+            <div key={key}
+              className={`grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-0 items-center px-5 py-3 hover:bg-gray-50/70 transition-colors ${isProfit ? '' : 'bg-red-50/20'}`}>
+              <div className="flex items-center gap-2">
+                <div className={`w-1.5 h-7 rounded-full shrink-0 ${isProfit ? 'bg-green-400' : 'bg-red-400'}`} />
+                <span className="text-sm font-semibold text-gray-800">{r.monthLabel}</span>
+              </div>
+              <div className="text-right">
+                <span className={`text-sm font-bold font-mono ${isProfit ? 'text-green-600' : 'text-red-500'}`}>
+                  {isProfit ? '+' : ''}₹{Math.abs(r.pnl).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                </span>
+                <div className="mt-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${isProfit ? 'bg-green-400' : 'bg-red-400'}`} style={{ width: `${barW}%` }} />
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-sm font-mono font-semibold text-gray-700">{r.winRate.toFixed(0)}%</span>
+                <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600" style={{ width: `${Math.min(100, r.winRate)}%` }} />
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-sm font-mono text-gray-700">{r.trades}</span>
+                <p className="text-[10px] text-gray-400">{r.wins}W · {r.trades - r.wins}L</p>
+              </div>
+              <div className="text-right">
+                {ds && ds.best !== -Infinity ? (
+                  <span className="text-sm font-mono font-semibold text-green-600">
+                    +₹{Math.abs(ds.best).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </span>
+                ) : <span className="text-gray-300">—</span>}
+              </div>
+              <div className="text-right">
+                {ds && ds.worst !== Infinity ? (
+                  <span className={`text-sm font-mono font-semibold ${ds.worst < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                    {ds.worst >= 0 ? '+' : ''}₹{Math.abs(ds.worst).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </span>
+                ) : <span className="text-gray-300">—</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="px-5 py-3 bg-gray-50/60 border-t border-gray-100 flex items-center gap-6 text-xs text-gray-500">
+        <span><span className="font-semibold text-green-600">{rows.filter(r => r.pnl > 0).length}</span> profitable months</span>
+        <span><span className="font-semibold text-red-500">{rows.filter(r => r.pnl < 0).length}</span> losing months</span>
+        <span>Best: <span className="font-semibold text-green-600 font-mono">{rows.reduce((b, r) => r.pnl > b.pnl ? r : b, rows[0])?.monthLabel ?? '—'}</span></span>
+        <span>Worst: <span className="font-semibold text-red-500 font-mono">{rows.reduce((b, r) => r.pnl < b.pnl ? r : b, rows[0])?.monthLabel ?? '—'}</span></span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Dashboard Root ───────────────────────────────────────────── */
 export function Dashboard({ trades: allTrades, historical2025 }: Props) {
   const [year, setYear] = useState(() => { try { return localStorage.getItem('tj-filter-year') || 'all'; } catch { return 'all'; } });
@@ -756,6 +857,8 @@ export function Dashboard({ trades: allTrades, historical2025 }: Props) {
           {allTrades.length >= 5 && (
             <PredictiveIntelligence trades={allTrades} stats={stats} />
           )}
+
+          <MonthlyBreakdown trades={allTrades} />
 
           {allTrades.length >= 10 && (
             <div>
