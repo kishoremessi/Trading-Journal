@@ -364,7 +364,7 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
 
           {/* Total P&L */}
           <div className="px-6 py-5">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">Total P&amp;L</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 text-[#00060f]">Total P&amp;L</p>
             <p className={`text-3xl font-extrabold font-mono leading-none ${stats.totalPnl >= 0 ? 'text-green-600' : 'text-red-500'}`}>
               {formatPnl(stats.totalPnl)}
             </p>
@@ -373,7 +373,7 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
 
           {/* Win Rate with bar */}
           <div className="px-6 py-5">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">Win Rate</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 text-[#00040a]">Win Rate</p>
             <div className="flex items-end gap-2">
               <p className="text-3xl font-extrabold font-mono leading-none text-gray-900">
                 {stats.winRate.toFixed(1)}<span className="text-lg text-gray-400 font-bold">%</span>
@@ -388,7 +388,7 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
 
           {/* Profit Factor */}
           <div className="px-6 py-5">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">Profit Factor</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 text-[#000308]">Profit Factor</p>
             <p className="text-3xl font-extrabold font-mono leading-none" style={{ color: pfColor }}>
               {stats.profitFactor.toFixed(2)}
             </p>
@@ -398,7 +398,6 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
           </div>
         </div>
       </div>
-
       {/* ── Secondary row: compact pills ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
@@ -428,11 +427,11 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
             : { label: 'Total Trades', value: String(stats.totalTrades), sub: formatPnlFull(stats.totalPnl) + ' net', color: '#374151', accent: '#6b7280' },
         ].map(m => (
           <div key={m.label}
-            className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm flex flex-col gap-0.5"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm flex gap-0.5 justify-start items-center flex-col"
             style={{ borderLeftWidth: 3, borderLeftColor: m.accent }}>
             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{m.label}</p>
             <p className="text-xl font-extrabold font-mono leading-none" style={{ color: m.color }}>{m.value}</p>
-            <p className="text-[10px] text-gray-400 leading-tight mt-0.5">{m.sub}</p>
+            <p className="mt-0.5 text-[#032a70] text-[14px]">{m.sub}</p>
           </div>
         ))}
       </div>
