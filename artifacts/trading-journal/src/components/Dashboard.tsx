@@ -550,30 +550,30 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
           <div className="bg-green-50 border border-green-200 rounded-xl p-3.5">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Avg Monthly Profit</p>
-            <p className="text-2xl font-bold font-mono text-green-600">{avgMonthly > 0 ? fmtK(avgMonthly) : '—'}</p>
-            <p className={`text-sm font-mono font-semibold mt-1 ${avgReturn >= 0 ? 'text-green-500' : 'text-red-400'}`}>{avgReturn >= 0 ? '+' : ''}{avgReturn.toFixed(1)}% / mo</p>
+            <p className="text-[10px] uppercase tracking-wide mb-1.5 text-[#000308] text-center">Avg Monthly Profit</p>
+            <p className="text-2xl font-bold font-mono text-green-600 text-center">{avgMonthly > 0 ? fmtK(avgMonthly) : '—'}</p>
+            <p className="text-sm font-mono font-semibold mt-1 text-green-500 text-center">{avgReturn >= 0 ? '+' : ''}{avgReturn.toFixed(1)}% / mo</p>
           </div>
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-3.5">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">Max Drawdown</p>
-            <p className="text-2xl font-bold font-mono text-orange-600">{maxDD > 0 ? fmtK(-maxDD) : '—'}</p>
-            <p className="text-sm font-mono font-semibold text-orange-500 mt-1">-{maxDDPct.toFixed(1)}% of capital</p>
+            <p className="text-[10px] uppercase tracking-wide mb-1.5 text-center text-[#000308]">Max Drawdown</p>
+            <p className="text-2xl font-bold font-mono text-orange-600 text-center">{maxDD > 0 ? fmtK(-maxDD) : '—'}</p>
+            <p className="text-sm font-mono font-semibold text-orange-500 mt-1 text-center">-{maxDDPct.toFixed(1)}% of capital</p>
           </div>
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">If Perform Good</p>
+            <p className="text-[10px] uppercase tracking-wide mb-1.5 text-[#00040a] text-center">If Perform Good</p>
             {bestMonth ? (
               <>
-                <p className="text-2xl font-bold font-mono text-emerald-600">{fmtK(bestPnl)}</p>
-                <p className="text-sm font-mono font-semibold text-emerald-500 mt-1">+{bestPct.toFixed(1)}% · {MONTH_LABELS[bestMonth.month]} {bestMonth.year}</p>
+                <p className="text-2xl font-bold font-mono text-emerald-600 text-center">{fmtK(bestPnl)}</p>
+                <p className="text-sm font-mono font-semibold text-emerald-500 mt-1 text-center">+{bestPct.toFixed(1)}% · {MONTH_LABELS[bestMonth.month]} {bestMonth.year}</p>
               </>
             ) : <p className="text-xl text-gray-400">—</p>}
           </div>
           <div className="bg-red-50 border border-red-200 rounded-xl p-3.5">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1.5">If Perform Worst</p>
+            <p className="text-[10px] uppercase tracking-wide mb-1.5 text-center text-[#00040a]">If Perform Worst</p>
             {worstMonth ? (
               <>
-                <p className="text-2xl font-bold font-mono text-red-600">{fmtK(worstPnl)}</p>
-                <p className="text-sm font-mono font-semibold text-red-500 mt-1">{worstPct.toFixed(1)}% · {MONTH_LABELS[worstMonth.month]} {worstMonth.year}</p>
+                <p className="text-2xl font-bold font-mono text-red-600 text-center">{fmtK(worstPnl)}</p>
+                <p className="text-sm font-mono font-semibold text-red-500 mt-1 text-center">{worstPct.toFixed(1)}% · {MONTH_LABELS[worstMonth.month]} {worstMonth.year}</p>
               </>
             ) : <p className="text-xl text-gray-400">—</p>}
           </div>
