@@ -508,7 +508,7 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 flex-wrap text-[18px] justify-center items-start">
+      <div className="flex gap-2 flex-wrap text-[18px] justify-center items-center">
         <h3 className="font-semibold text-gray-900 text-[16px]">Predictive Intelligence</h3>
         <span className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-0.5 rounded-full">
           {monthlyStats.length} months analysed
