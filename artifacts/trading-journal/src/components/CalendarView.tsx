@@ -85,50 +85,51 @@ function buildMonthSegBreakdown(trades: Trade[], year: number, month: number): S
 }
 
 /* ── Segment Ranked Cards ──────────────────────────────────────── */
-function SegmentRankedCards({ segs, title }: { segs: SegBreakdown[]; title?: string }) {
+function CompactSegmentTable({ segs, title }: { segs: SegBreakdown[]; title?: string }) {
   if (!segs.length) return null;
   return (
     <div className="space-y-2">
       {title && (
         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">{title}</h4>
       )}
-      {segs.map((seg, i) => {
-        const winRate = seg.tradeCount > 0 ? (seg.wins / seg.tradeCount) * 100 : 0;
-        const isPos = seg.pnl >= 0;
-        const medal = RANK_MEDALS[i];
-        return (
-          <div key={seg.segment}
-            className={`rounded-xl border p-3 ${isPos
-              ? i === 0 ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
-              : i === segs.length - 1 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {medal ? (
-                  <span className="text-base leading-none">{medal}</span>
-                ) : (
-                  <span className={`text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${isPos ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                    {i + 1}
-                  </span>
-                )}
-                <span className="text-sm font-semibold text-gray-800">{seg.segment}</span>
-              </div>
-              <div className="text-right">
-                <span className={`text-sm font-bold font-mono ${isPos ? 'text-green-600' : 'text-red-500'}`}>
-                  {fmtFull(seg.pnl)}
-                </span>
-                {seg.tax !== 0 && (
-                  <span className="text-[10px] text-gray-400 font-mono ml-1.5">tax {fmtTax(seg.tax)}</span>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-gray-400 mt-1.5">
-              <span>{seg.tradeCount} trade{seg.tradeCount > 1 ? 's' : ''}</span>
-              <span>{seg.wins}W · {seg.tradeCount - seg.wins}L</span>
-              <span>{winRate.toFixed(0)}% WR</span>
-            </div>
-          </div>
-        );
-      })}
+      <div className="rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              <th className="text-left py-2 px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wide">Segment</th>
+              <th className="text-right py-2 px-2 text-[10px] font-bold text-gray-400 uppercase tracking-wide">P&L</th>
+              <th className="text-right py-2 px-2 text-[10px] font-bold text-gray-400 uppercase tracking-wide">Trades</th>
+              <th className="text-right py-2 px-2 text-[10px] font-bold text-gray-400 uppercase tracking-wide">W/L</th>
+              <th className="text-right py-2 px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wide">WR</th>
+            </tr>
+          </thead>
+          <tbody>
+            {segs.map((seg, i) => {
+              const winRate = seg.tradeCount > 0 ? (seg.wins / seg.tradeCount) * 100 : 0;
+              const isPos = seg.pnl >= 0;
+              const medal = RANK_MEDALS[i];
+              return (
+                <tr key={seg.segment} className={`border-b border-gray-100 last:border-b-0 ${i === 0 ? 'bg-green-50/40' : !isPos && i === segs.length - 1 ? 'bg-red-50/40' : ''}`}>
+                  <td className="py-2 px-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm leading-none">{medal ?? <span className={`text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${isPos ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{i + 1}</span>}</span>
+                      <span className="font-semibold text-gray-800">{seg.segment}</span>
+                    </div>
+                  </td>
+                  <td className={`py-2 px-2 text-right font-mono font-bold ${isPos ? 'text-green-600' : 'text-red-500'}`}>
+                    {fmtFull(seg.pnl)}
+                  </td>
+                  <td className="py-2 px-2 text-right text-gray-500 font-mono">{seg.tradeCount}</td>
+                  <td className="py-2 px-2 text-right text-gray-500 font-mono">{seg.wins}W/{seg.tradeCount - seg.wins}L</td>
+                  <td className={`py-2 px-3 text-right font-mono font-bold ${winRate >= 55 ? 'text-green-600' : winRate >= 45 ? 'text-amber-600' : 'text-red-500'}`}>
+                    {winRate.toFixed(0)}%
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -441,7 +442,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
             </h3>
             <span className="text-xs text-gray-400">Best → Worst</span>
           </div>
-          <SegmentRankedCards segs={monthSegs} />
+          <CompactSegmentTable segs={monthSegs} />
         </div>
       )}
 

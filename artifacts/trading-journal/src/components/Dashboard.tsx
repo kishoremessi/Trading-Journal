@@ -468,49 +468,67 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
 }
 
 /* ── Section 5: Instrument Group Performance ─────────────────── */
+function GroupCard({ g, rank }: { g: InstrumentGroup; rank: number }) {
+  const isProfit = g.totalPnl >= 0;
+  const medal = RANK_MEDALS[rank];
+  return (
+    <div className={`bg-white rounded-xl border p-4 shadow-sm ${isProfit ? 'border-gray-200' : 'border-red-200 bg-red-50/30'}`}>
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-base">{medal ?? <span className="text-xs font-bold text-gray-500 bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center">#{rank + 1}</span>}</span>
+          <div>
+            <p className="text-sm font-bold text-gray-900">{g.name}</p>
+            <p className="text-[10px] text-gray-400">{g.trades} trades · {g.wins}W / {g.trades - g.wins}L</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className={`text-base font-bold font-mono ${isProfit ? 'text-green-600' : 'text-red-500'}`}>{formatPnl(g.totalPnl, false)}</p>
+          <p className={`text-[10px] font-semibold ${g.avgTrade > 100 ? 'text-green-600' : g.avgTrade < -100 ? 'text-red-500' : 'text-gray-400'}`}>
+            {g.avgTrade > 100 ? '↑ Improving' : g.avgTrade < -100 ? '↓ Weakening' : '→ Stable'}
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {[
+          { label: 'Win Rate', val: `${g.winRate.toFixed(1)}%`, color: g.winRate >= 55 ? 'text-green-600' : g.winRate >= 45 ? 'text-amber-600' : 'text-red-500' },
+          { label: 'Prof. Factor', val: g.profitFactor.toFixed(2), color: g.profitFactor >= 1.5 ? 'text-green-600' : g.profitFactor >= 1 ? 'text-amber-600' : 'text-red-500' },
+          { label: 'Avg/Trade', val: formatPnl(g.avgTrade, true), color: g.avgTrade >= 0 ? 'text-green-600' : 'text-red-500' },
+          { label: 'Avg Win', val: formatPnl(g.avgWin, true), color: 'text-green-600' },
+          { label: 'Avg Loss', val: formatPnl(g.avgLoss, true), color: 'text-red-500' },
+          { label: 'Max DD', val: g.maxDrawdown > 0 ? formatPnl(-g.maxDrawdown, true) : '—', color: 'text-orange-500' },
+        ].map(m => (
+          <div key={m.label} className="bg-gray-50 rounded-lg p-2 border border-gray-100 text-center">
+            <p className="text-[9px] text-gray-400 mb-0.5">{m.label}</p>
+            <p className={`text-sm font-bold font-mono ${m.color}`}>{m.val}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex items-center gap-1 bg-blue-50 border border-blue-200 rounded-lg px-2 py-1">
+          <span className="text-[9px] text-gray-400">CE</span>
+          <span className={`font-mono font-semibold ${g.cePnl >= 0 ? 'text-blue-600' : 'text-red-500'}`}>{formatPnl(g.cePnl, true)}</span>
+          <span className="text-[10px] text-gray-400">{g.ceWinRate.toFixed(0)}%WR</span>
+        </div>
+        <div className="flex items-center gap-1 bg-violet-50 border border-violet-200 rounded-lg px-2 py-1">
+          <span className="text-[9px] text-gray-400">PE</span>
+          <span className={`font-mono font-semibold ${g.pePnl >= 0 ? 'text-violet-600' : 'text-red-500'}`}>{formatPnl(g.pePnl, true)}</span>
+          <span className="text-[10px] text-gray-400">{g.peWinRate.toFixed(0)}%WR</span>
+        </div>
+        <div className={`flex items-center gap-1 rounded-lg px-2 py-1 border ${g.cePnl > g.pePnl ? 'bg-blue-50 border-blue-200' : 'bg-violet-50 border-violet-200'}`}>
+          <span className="text-[9px] text-gray-400">{g.cePnl > g.pePnl ? 'CE leads' : 'PE leads'}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function InstrumentGroups({ groups }: { groups: InstrumentGroup[] }) {
   const sorted = useMemo(() => [...groups].sort((a, b) => b.totalPnl - a.totalPnl), [groups]);
-  const medals = ['🥇', '🥈', '🥉'];
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {sorted.map((g, i) => {
-        const isProfit = g.totalPnl >= 0;
-        return (
-          <div key={g.name} className={`rounded-xl border p-4 shadow-sm ${isProfit ? 'bg-white border-gray-200' : 'bg-red-50/50 border-red-200'}`}>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{medals[i] ?? `#${i+1}`}</span>
-                <div>
-                  <p className="text-sm font-bold text-gray-900">{g.name}</p>
-                  <p className="text-xs text-gray-400">{g.trades} trades · {g.winRate.toFixed(0)}% WR</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className={`text-lg font-bold font-mono ${isProfit ? 'text-green-600' : 'text-red-500'}`}>
-                  {formatPnl(g.totalPnl, false)}
-                </p>
-                <p className="text-[10px] text-gray-400">combined P&L</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className={`rounded-lg p-2.5 border ${g.cePnl >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'}`}>
-                <p className="text-[10px] text-gray-400 mb-0.5">CE · {g.ceTrades}T · {g.ceWinRate.toFixed(0)}%WR</p>
-                <p className={`text-sm font-bold font-mono ${g.cePnl >= 0 ? 'text-blue-700' : 'text-red-600'}`}>{formatPnl(g.cePnl, false)}</p>
-              </div>
-              <div className={`rounded-lg p-2.5 border ${g.pePnl >= 0 ? 'bg-violet-50 border-violet-200' : 'bg-red-50 border-red-200'}`}>
-                <p className="text-[10px] text-gray-400 mb-0.5">PE · {g.peTrades}T · {g.peWinRate.toFixed(0)}%WR</p>
-                <p className={`text-sm font-bold font-mono ${g.pePnl >= 0 ? 'text-violet-700' : 'text-red-600'}`}>{formatPnl(g.pePnl, false)}</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-              <span>PF: <span className={`font-mono font-semibold ${g.profitFactor >= 1.5 ? 'text-green-600' : g.profitFactor >= 1 ? 'text-amber-600' : 'text-red-500'}`}>{g.profitFactor.toFixed(2)}</span></span>
-              <span>Avg: <span className={`font-mono font-semibold ${g.avgTrade >= 0 ? 'text-green-600' : 'text-red-500'}`}>{formatPnl(g.avgTrade)}</span></span>
-              <span>{g.wins}W / {g.trades - g.wins}L</span>
-            </div>
-          </div>
-        );
-      })}
+      {sorted.map((g, i) => (
+        <GroupCard key={g.name} g={g} rank={i} />
+      ))}
     </div>
   );
 }
@@ -1139,8 +1157,6 @@ export function Dashboard({ trades: allTrades, historical2025 }: Props) {
           </div>
 
           <MonthlyBreakdown trades={filteredTrades} />
-
-          <SegmentHeatmap trades={filteredTrades} />
 
           {groupedSegments.length > 0 && (
             <div>

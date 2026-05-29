@@ -49,6 +49,9 @@ export interface InstrumentGroup {
   peTrades: number;
   profitFactor: number;
   avgTrade: number;
+  avgWin: number;
+  avgLoss: number;
+  maxDrawdown: number;
   segments: string[];
 }
 
@@ -182,6 +185,16 @@ export function computeGroupedSegments(trades: Trade[]): InstrumentGroup[] {
     const peWins    = g.peTrades.filter(t => t.actualProfit > 0).length;
     const sumWins   = wins.reduce((s, t) => s + t.actualProfit, 0);
     const sumLosses = Math.abs(losses.reduce((s, t) => s + t.actualProfit, 0));
+    const avgWin = wins.length ? sumWins / wins.length : 0;
+    const avgLoss = losses.length ? sumLosses / losses.length : 0;
+    let peak = 0, cum = 0, maxDD = 0;
+    const sortedTrades = [...allTrades].sort((a, b) => a.date.getTime() - b.date.getTime());
+    for (const t of sortedTrades) {
+      cum += t.actualProfit;
+      if (cum > peak) peak = cum;
+      const dd = peak - cum;
+      if (dd > maxDD) maxDD = dd;
+    }
     result.push({
       name, totalPnl,
       trades: allTrades.length,
@@ -194,6 +207,7 @@ export function computeGroupedSegments(trades: Trade[]): InstrumentGroup[] {
       peTrades: g.peTrades.length,
       profitFactor: sumLosses > 0 ? sumWins / sumLosses : 0,
       avgTrade: allTrades.length > 0 ? totalPnl / allTrades.length : 0,
+      avgWin, avgLoss, maxDrawdown: maxDD,
       segments: Array.from(g.segments).sort(),
     });
   }
