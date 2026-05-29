@@ -245,7 +245,7 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
       {/* ── Stats header ── */}
-      <div className="flex flex-wrap gap-5 px-5 py-4 border-b border-gray-100">
+      <div className="flex flex-wrap gap-5 px-5 py-4 border-b border-gray-100 justify-between text-center">
         {[
           { label: 'Current Equity',    val: fmtFull(ddInfo.currentEquity),   color: ddInfo.currentEquity >= 0 ? 'text-green-600' : 'text-red-500' },
           { label: 'Peak Equity',       val: fmtFull(ddInfo.peakEquity),       color: 'text-gray-800' },
