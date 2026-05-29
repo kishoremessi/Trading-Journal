@@ -530,8 +530,8 @@ function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: Tra
       <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
         <div className="flex flex-wrap mb-4 justify-between items-start gap-[50px]">
           <div>
-            <p className="text-sm font-semibold text-gray-900">Lot Size Calculator</p>
-            <p className="text-xs text-gray-400 mt-0.5">₹50,000 capital required per lot · based on historical data</p>
+            <p className="font-semibold text-gray-900 text-[16px]">Lot Size Calculator for future calculation:</p>
+            <p className="mt-0.5 font-light text-[#032663] text-[13px]">₹50,000 capital required per lot · based on historical data</p>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-gray-500 font-medium">Lots:</label>
