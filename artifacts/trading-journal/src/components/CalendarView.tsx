@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import { DayPnl, formatPnl } from '../lib/stats';
 import { Trade } from '../lib/sheetParser';
-import { MonthlyBreakdown } from './Dashboard';
 
 interface Props {
   dayPnls: DayPnl[];
@@ -457,9 +456,6 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           <CompactSegmentTable segs={monthSegs} />
         </div>
       )}
-
-      {/* Month-on-month breakdown */}
-      <MonthlyBreakdown trades={trades} />
     </div>
   );
 }
