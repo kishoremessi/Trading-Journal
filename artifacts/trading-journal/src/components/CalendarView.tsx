@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import { DayPnl, formatPnl } from '../lib/stats';
 import { Trade } from '../lib/sheetParser';
+import { MonthlyBreakdown } from './Dashboard';
 
 interface Props {
   dayPnls: DayPnl[];
@@ -426,6 +427,22 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-orange-100 border border-gray-200" /><span className="text-[10px] text-gray-400">Heavy Loss (&gt;5%)</span></div>
           <span className="text-[10px] text-gray-400 italic">Click day for details</span>
         </div>
+
+        {/* Month strip — inside the calendar card */}
+        <div className="border-t border-gray-100 pt-3 mt-2">
+          <div className="flex gap-1.5 flex-wrap">
+            {months.map((m, i) => (
+              <button key={i} onClick={() => setMonthIdx(i)} data-testid={`button-month-${m.label}`}
+                className={`flex flex-col items-center px-2 py-1.5 rounded-lg text-xs transition-all ${
+                  i === monthIdx ? 'bg-blue-50 border border-blue-300 shadow-sm' : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                }`}>
+                <span className="text-gray-500 font-medium">{SHORT_MONTH[m.month]} {String(m.year).slice(2)}</span>
+                <span className={`font-mono font-bold mt-0.5 ${m.totalPnl >= 0 ? 'text-green-600' : 'text-red-500'}`}>{formatPnl(m.totalPnl)}</span>
+                <span className={`font-mono text-[10px] ${m.returnPct >= 0 ? 'text-green-500' : 'text-red-400'}`}>{fmtPct(m.returnPct)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Monthly segment breakdown */}
@@ -441,21 +458,8 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
         </div>
       )}
 
-      {/* Month strip */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-        <div className="flex gap-2 flex-wrap">
-          {months.map((m, i) => (
-            <button key={i} onClick={() => setMonthIdx(i)} data-testid={`button-month-${m.label}`}
-              className={`flex flex-col items-center px-2.5 py-2 rounded-xl text-xs transition-all ${
-                i === monthIdx ? 'bg-blue-50 border-2 border-blue-300 shadow-sm' : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
-              }`}>
-              <span className="text-gray-500 font-medium">{SHORT_MONTH[m.month]} {String(m.year).slice(2)}</span>
-              <span className={`font-mono font-bold mt-0.5 ${m.totalPnl >= 0 ? 'text-green-600' : 'text-red-500'}`}>{formatPnl(m.totalPnl)}</span>
-              <span className={`font-mono text-[10px] ${m.returnPct >= 0 ? 'text-green-500' : 'text-red-400'}`}>{fmtPct(m.returnPct)}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Month-on-month breakdown */}
+      <MonthlyBreakdown trades={trades} />
     </div>
   );
 }

@@ -845,7 +845,7 @@ function AchievementsSystem({ trades }: { trades: Trade[] }) {
 }
 
 /* ── Section 4b: Monthly Breakdown Table ─────────────────────── */
-function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
+export function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
   const monthly = useMemo(() => calculateMonthlyStats(trades), [trades]);
 
   // Compute best & worst day per month from raw trades
