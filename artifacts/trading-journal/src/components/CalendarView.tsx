@@ -315,7 +315,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           {/* Current month — compact single row */}
           <div className="flex-1 text-center">
             <div className="flex items-center justify-center gap-2 flex-wrap">
-              <h2 className="text-sm font-bold text-gray-900">
+              <h2 className="text-sm font-bold text-[#012a7d]">
                 {MONTH_NAMES[currentMonth.month]} {currentMonth.year}
               </h2>
               <span className={`text-sm font-bold font-mono ${isProfit ? 'text-green-600' : 'text-red-500'}`}>
