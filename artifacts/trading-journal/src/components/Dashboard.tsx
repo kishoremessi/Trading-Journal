@@ -429,7 +429,7 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
           <div key={m.label}
             className="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm flex gap-0.5 justify-start items-center flex-col"
             style={{ borderLeftWidth: 3, borderLeftColor: m.accent }}>
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{m.label}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#00040a]">{m.label}</p>
             <p className="text-xl font-extrabold font-mono leading-none" style={{ color: m.color }}>{m.value}</p>
             <p className="mt-0.5 text-[#032a70] text-[14px]">{m.sub}</p>
           </div>
@@ -443,7 +443,9 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
 const LOT_CAPITAL = 50000;
 // Returns the number of lots traded in a given month based on period
 function getHistoricalLots(year: number, month: number): number {
-  return (year > 2026 || (year === 2026 && month >= 2)) ? 3 : 1;
+  if (year === 2025 && month === 10) return 2; // Nov 2025 = 2 lots
+  if (year > 2026 || (year === 2026 && month >= 2)) return 3; // Mar 2026+ = 3 lots
+  return 1; // Default = 1 lot
 }
 
 function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: TradeStats }) {

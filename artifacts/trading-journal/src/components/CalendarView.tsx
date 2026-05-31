@@ -27,10 +27,14 @@ function toLocalDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function getCapital(year: number, month: number): number {
-  return (year > 2026 || (year === 2026 && month >= 3)) ? 150000 : 50000;
+  if (year === 2025 && month === 10) return 100000; // Nov 2025 = 2 lots = 100k
+  if (year > 2026 || (year === 2026 && month >= 3)) return 150000; // Mar 2026+ = 3 lots
+  return 50000; // Default = 1 lot
 }
 function getLots(year: number, month: number): number {
-  return (year > 2026 || (year === 2026 && month >= 3)) ? 3 : 1;
+  if (year === 2025 && month === 10) return 2; // Nov 2025 = 2 lots
+  if (year > 2026 || (year === 2026 && month >= 3)) return 3; // Mar 2026+ = 3 lots
+  return 1; // Default = 1 lot
 }
 function fmtPct(pct: number): string {
   return `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
