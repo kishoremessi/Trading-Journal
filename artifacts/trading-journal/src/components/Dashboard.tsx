@@ -767,7 +767,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
               </div>
               <div className="text-right">
                 {ds && ds.best !== -Infinity ? (
-                  <span className="font-mono font-semibold text-green-600 text-[16px]">
+                  <span className="font-mono text-green-600 text-[16px] font-extrabold">
                     +₹{Math.abs(ds.best).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                 ) : <span className="text-gray-300">—</span>}
