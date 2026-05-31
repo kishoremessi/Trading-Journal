@@ -756,7 +756,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
                 </div>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <span className="font-mono font-semibold text-gray-700 text-[16px]">{r.winRate.toFixed(0)}%</span>
+                <span className="font-mono text-gray-700 text-[16px] font-bold">{r.winRate.toFixed(0)}%</span>
                 <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600" style={{ width: `${Math.min(100, r.winRate)}%` }} />
                 </div>
