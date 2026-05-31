@@ -383,7 +383,7 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
               <div className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600 transition-all"
                 style={{ width: `${wrPct}%` }} />
             </div>
-            <p className="text-[11px] text-gray-400 mt-1">{stats.wins}W · {stats.losses}L of {stats.totalTrades}</p>
+            <p className="text-[11px] mt-1 text-[#0252de] font-extrabold">{stats.wins}W · {stats.losses}L of {stats.totalTrades}</p>
           </div>
 
           {/* Profit Factor */}
