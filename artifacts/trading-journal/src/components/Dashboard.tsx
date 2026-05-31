@@ -756,25 +756,25 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
                 </div>
               </div>
               <div className="flex flex-col items-center gap-1">
-                <span className="text-sm font-mono font-semibold text-gray-700">{r.winRate.toFixed(0)}%</span>
+                <span className="font-mono font-semibold text-gray-700 text-[16px]">{r.winRate.toFixed(0)}%</span>
                 <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600" style={{ width: `${Math.min(100, r.winRate)}%` }} />
                 </div>
               </div>
               <div className="text-center">
                 <span className="font-mono text-[#000308] text-[16px] text-right">{r.trades}</span>
-                <p className="text-[#00040a] text-[12px] text-center">{r.wins}W · {r.trades - r.wins}L</p>
+                <p className="text-[#00040a] text-center text-[12px]">{r.wins}W · {r.trades - r.wins}L</p>
               </div>
               <div className="text-right">
                 {ds && ds.best !== -Infinity ? (
-                  <span className="text-sm font-mono font-semibold text-green-600">
+                  <span className="font-mono font-semibold text-green-600 text-[16px]">
                     +₹{Math.abs(ds.best).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                 ) : <span className="text-gray-300">—</span>}
               </div>
               <div className="text-right">
                 {ds && ds.worst !== Infinity ? (
-                  <span className={`text-sm font-mono font-semibold ${ds.worst < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  <span className="font-mono font-semibold text-red-500 text-[16px]">
                     {ds.worst >= 0 ? '+' : ''}₹{Math.abs(ds.worst).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                 ) : <span className="text-gray-300">—</span>}
