@@ -730,7 +730,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
         <span>Month</span>
         <span className="text-right">P&amp;L</span>
         <span className="text-center">Win Rate</span>
-        <span className="text-right">Trades</span>
+        <span className="text-center">Trades</span>
         <span className="text-right">Best Day</span>
         <span className="text-right">Worst Day</span>
       </div>
