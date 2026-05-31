@@ -763,7 +763,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
               </div>
               <div className="text-center">
                 <span className="font-mono text-[#000308] text-[16px] text-right">{r.trades}</span>
-                <p className="text-[#00040a] text-[12px] text-right">{r.wins}W · {r.trades - r.wins}L</p>
+                <p className="text-[#00040a] text-[12px] text-center">{r.wins}W · {r.trades - r.wins}L</p>
               </div>
               <div className="text-right">
                 {ds && ds.best !== -Infinity ? (
