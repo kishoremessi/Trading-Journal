@@ -728,7 +728,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
       </div>
       <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-0 text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-5 py-2 border-b border-gray-100 bg-gray-50/60">
         <span>Month</span>
-        <span className="text-right">P&amp;L</span>
+        <span className="text-center">P&amp;L</span>
         <span className="text-center">Win Rate</span>
         <span className="text-center">Trades</span>
         <span className="text-right">Best Day</span>
