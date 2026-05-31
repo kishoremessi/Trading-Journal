@@ -414,7 +414,7 @@ function GroupCard({ g, rank }: { g: InstrumentGroup; rank: number }) {
           { label: 'Max DD', val: g.maxDrawdown > 0 ? fmtK(-g.maxDrawdown) : '—', color: 'text-orange-500' },
         ].map(m => (
           <div key={m.label} className="bg-gray-50 rounded-lg p-2 border border-gray-100 text-center">
-            <p className="text-[9px] mb-0.5 text-[#0f0101]">{m.label}</p>
+            <p className="mb-0.5 text-[#0f0101] text-[12px]">{m.label}</p>
             <p className={`text-sm font-bold font-mono ${m.color}`}>{m.val}</p>
           </div>
         ))}
