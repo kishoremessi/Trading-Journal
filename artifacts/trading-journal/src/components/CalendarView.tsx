@@ -314,7 +314,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
               <h2 className="font-bold text-[15px] text-[#0841a6]">
                 {MONTH_NAMES[currentMonth.month]} {currentMonth.year}
               </h2>
-              <span className={`text-sm font-bold font-mono ${isProfit ? 'text-green-600' : 'text-red-500'}`}>
+              <span className="font-bold font-mono text-[15px] text-[#07ad46]">
                 {isProfit ? '↑' : '↓'} {fmtFull(currentMonth.totalPnl)}
               </span>
               <span className={`text-xs font-mono font-semibold ${isProfit ? 'text-green-500' : 'text-red-400'}`}>
