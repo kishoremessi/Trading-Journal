@@ -761,7 +761,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
                   <div className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-600" style={{ width: `${Math.min(100, r.winRate)}%` }} />
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-center">
                 <span className="font-mono text-[#000308] text-[16px] text-right">{r.trades}</span>
                 <p className="text-[#00040a] text-[12px] text-right">{r.wins}W · {r.trades - r.wins}L</p>
               </div>
