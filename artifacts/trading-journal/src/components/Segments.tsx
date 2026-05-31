@@ -85,7 +85,6 @@ function SegmentIntelCard({ seg, rank, trades: allTrades }: { seg: SegmentStats;
           <p className={`text-[10px] font-semibold ${trend.color}`}>{trend.label}</p>
         </div>
       </div>
-
       {/* Stats grid */}
       <div className="grid grid-cols-3 gap-2 mb-3">
         {[
@@ -97,12 +96,11 @@ function SegmentIntelCard({ seg, rank, trades: allTrades }: { seg: SegmentStats;
           { label: 'Max Drawdown', val: ddInfo.maxDrawdown > 0 ? fmtK(-ddInfo.maxDrawdown) : '—', color: 'text-orange-500' },
         ].map(m => (
           <div key={m.label} className="bg-gray-50 rounded-lg p-2 border border-gray-100 text-center">
-            <p className="text-[9px] text-gray-400 mb-0.5">{m.label}</p>
+            <p className="mb-0.5 text-[#00060f] text-[11px]">{m.label}</p>
             <p className={`text-sm font-bold font-mono ${m.color}`}>{m.val}</p>
           </div>
         ))}
       </div>
-
       {/* Best/Worst Month + Year */}
       <div className="flex flex-wrap gap-2 text-xs">
         {bestMonth && (
