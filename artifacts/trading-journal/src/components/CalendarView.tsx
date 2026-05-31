@@ -302,7 +302,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           <div className="w-16 shrink-0">
             {prevMonth && (
               <div>
-                <p className="text-[10px] text-[#000205]">{SHORT_MONTH[prevMonth.month]} {prevMonth.year}</p>
+                <p className="text-[10px] text-gray-400">{SHORT_MONTH[prevMonth.month]} {prevMonth.year}</p>
                 <p className={`text-xs font-bold font-mono ${prevMonth.totalPnl >= 0 ? 'text-green-600' : 'text-red-500'}`}>{formatPnl(prevMonth.totalPnl)}</p>
               </div>
             )}
@@ -311,13 +311,13 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           {/* Current month — compact single row */}
           <div className="flex-1 text-center">
             <div className="flex items-center justify-center gap-2 flex-wrap">
-              <h2 className="font-bold text-[15px] text-[#0841a6]">
+              <h2 className="text-sm font-bold text-gray-900">
                 {MONTH_NAMES[currentMonth.month]} {currentMonth.year}
               </h2>
-              <span className="font-bold font-mono text-[15px] text-[#07ad46]">
+              <span className={`text-sm font-bold font-mono ${isProfit ? 'text-green-600' : 'text-red-500'}`}>
                 {isProfit ? '↑' : '↓'} {fmtFull(currentMonth.totalPnl)}
               </span>
-              <span className="font-mono text-green-500 text-[13px] font-bold">
+              <span className={`text-xs font-mono font-semibold ${isProfit ? 'text-green-500' : 'text-red-400'}`}>
                 ({fmtPct(currentMonth.returnPct)})
               </span>
               <span className="text-[12px] text-[#00050d]">{currentMonth.winDays}W/{currentMonth.lossDays}L · {currentMonth.tradingDays}d · {lots}L</span>
@@ -333,7 +333,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           <div className="w-16 shrink-0 text-right">
             {nextMonth && (
               <div>
-                <p className="text-[10px] text-[#000103]">{SHORT_MONTH[nextMonth.month]} {nextMonth.year}</p>
+                <p className="text-[10px] text-gray-400">{SHORT_MONTH[nextMonth.month]} {nextMonth.year}</p>
                 <p className={`text-xs font-bold font-mono ${nextMonth.totalPnl >= 0 ? 'text-green-600' : 'text-red-500'}`}>{formatPnl(nextMonth.totalPnl)}</p>
               </div>
             )}
