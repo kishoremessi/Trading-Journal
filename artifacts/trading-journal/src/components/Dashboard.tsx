@@ -283,50 +283,52 @@ function EquityCurve({ trades }: { trades: Trade[] }) {
         )}
       </div>
       {/* ── Equity + peak chart ── */}
-      <div className="px-3 pt-3 pb-2 bg-white text-left text-[#01070f]" style={{ height: 320 }}>
+      <div className="px-3 pt-3 pb-2 bg-white" style={{ height: 360 }}>
         {chartData.length > 1 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={{ top: 20, right: 20, left: 4, bottom: 8 }} style={{ background: '#ffffff' }}>
+            <ComposedChart data={chartData} margin={{ top: 24, right: 24, left: 4, bottom: 8 }} style={{ background: '#ffffff' }}>
               <defs>
                 <linearGradient id="posGrad2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#22c55e" stopOpacity={0.35} />
-                  <stop offset="50%"  stopColor="#22c55e" stopOpacity={0.08} />
+                  <stop offset="0%"   stopColor="#22c55e" stopOpacity={0.45} />
+                  <stop offset="30%"  stopColor="#22c55e" stopOpacity={0.18} />
+                  <stop offset="70%"  stopColor="#22c55e" stopOpacity={0.05} />
                   <stop offset="100%" stopColor="#22c55e" stopOpacity={0.01} />
                 </linearGradient>
                 <linearGradient id="negGrad2" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%"   stopColor="#ef4444" stopOpacity={0.01} />
-                  <stop offset="50%"  stopColor="#ef4444" stopOpacity={0.08} />
-                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.30} />
+                  <stop offset="30%"  stopColor="#ef4444" stopOpacity={0.05} />
+                  <stop offset="70%"  stopColor="#ef4444" stopOpacity={0.18} />
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.40} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" vertical={false} />
+              <CartesianGrid strokeDasharray="5 5" stroke="#f1f5f9" vertical={false} />
               <XAxis dataKey="name" tickFormatter={xTickFormatter} ticks={xTickValues}
-                tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 500 }} tickLine={false} axisLine={false} interval={0} angle={-30} textAnchor="end" height={55} />
-              <YAxis tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 500 }} tickLine={false} axisLine={false}
+                tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }} tickLine={false} axisLine={false} interval={0} angle={-30} textAnchor="end" height={55} />
+              <YAxis tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }} tickLine={false} axisLine={false}
                 tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} width={56} />
-              <ReferenceLine y={0} stroke="#9ca3af" strokeDasharray="6 3" strokeWidth={1} />
+              <ReferenceLine y={0} stroke="#94a3b8" strokeDasharray="8 4" strokeWidth={1} />
               <Tooltip content={<EquityTooltip />} />
 
-              <Line type="monotone" dataKey="peak" stroke="#cbd5e1" strokeWidth={1.5}
-                strokeDasharray="6 4" dot={false} activeDot={false} />
+              <Line type="monotone" dataKey="peak" stroke="#e2e8f0" strokeWidth={1.5}
+                strokeDasharray="8 4" dot={false} activeDot={false} />
 
-              <Area type="monotone" dataKey="pos" stroke="#22c55e" strokeWidth={3}
+              <Area type="monotone" dataKey="pos" stroke="#16a34a" strokeWidth={3.5}
                 fill="url(#posGrad2)" dot={false}
-                activeDot={{ r: 5, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }} animationDuration={800} />
-              <Area type="monotone" dataKey="neg" stroke="#ef4444" strokeWidth={3}
+                activeDot={{ r: 6, fill: '#16a34a', stroke: '#fff', strokeWidth: 2.5 }} animationDuration={1000} />
+              <Area type="monotone" dataKey="neg" stroke="#dc2626" strokeWidth={3.5}
                 fill="url(#negGrad2)" dot={false}
-                activeDot={{ r: 5, fill: '#ef4444', stroke: '#fff', strokeWidth: 2 }} animationDuration={800} />
+                activeDot={{ r: 6, fill: '#dc2626', stroke: '#fff', strokeWidth: 2.5 }} animationDuration={1000} />
 
               {bestPoint && bestPoint.equity > 0 && (
-                <ReferenceDot x={bestPoint.name} y={bestPoint.equity} r={7}
-                  fill="#22c55e" stroke="#fff" strokeWidth={3}
-                  label={{ value: `▲ ${fmtK(bestPoint.equity)}`, position: 'top', fontSize: 11, fill: '#15803d', fontWeight: 800 }} />
+                <ReferenceDot x={bestPoint.name} y={bestPoint.equity} r={8}
+                  fill="#16a34a" stroke="#fff" strokeWidth={3}
+                  label={{ value: `▲ ${fmtK(bestPoint.equity)}`, position: 'top', fontSize: 11, fill: '#166534', fontWeight: 800 }} />
               )}
 
               {worstPoint && worstPoint.equity < 0 && worstIdx !== bestIdx && (
-                <ReferenceDot x={worstPoint.name} y={worstPoint.equity} r={7}
-                  fill="#ef4444" stroke="#fff" strokeWidth={3}
-                  label={{ value: `▼ ${fmtK(worstPoint.equity)}`, position: 'bottom', fontSize: 11, fill: '#b91c1c', fontWeight: 800 }} />
+                <ReferenceDot x={worstPoint.name} y={worstPoint.equity} r={8}
+                  fill="#dc2626" stroke="#fff" strokeWidth={3}
+                  label={{ value: `▼ ${fmtK(worstPoint.equity)}`, position: 'bottom', fontSize: 11, fill: '#991b1b', fontWeight: 800 }} />
               )}
             </ComposedChart>
           </ResponsiveContainer>
@@ -443,7 +445,9 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
 const LOT_CAPITAL = 50000;
 // Returns the number of lots traded in a given month based on period
 function getHistoricalLots(year: number, month: number): number {
-  return (year > 2026 || (year === 2026 && month >= 2)) ? 3 : 1;
+  if (year === 2025 && month === 10) return 2; // Nov 2025: 2 lots
+  if (year > 2026 || (year === 2026 && month >= 2)) return 3; // Mar 2026 onwards: 3 lots
+  return 1; // Default: 1 lot
 }
 
 function PredictiveIntelligence({ trades, stats }: { trades: Trade[]; stats: TradeStats }) {
