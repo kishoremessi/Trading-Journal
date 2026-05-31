@@ -317,7 +317,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
               <span className="font-bold font-mono text-[15px] text-[#07ad46]">
                 {isProfit ? '↑' : '↓'} {fmtFull(currentMonth.totalPnl)}
               </span>
-              <span className={`text-xs font-mono font-semibold ${isProfit ? 'text-green-500' : 'text-red-400'}`}>
+              <span className="font-mono text-green-500 text-[13px] font-bold">
                 ({fmtPct(currentMonth.returnPct)})
               </span>
               <span className="text-[12px] text-[#00050d]">{currentMonth.winDays}W/{currentMonth.lossDays}L · {currentMonth.tradingDays}d · {lots}L</span>
