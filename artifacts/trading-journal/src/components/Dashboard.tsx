@@ -762,7 +762,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-sm font-mono text-gray-700">{r.trades}</span>
+                <span className="font-mono text-[#000308] text-[16px] text-right">{r.trades}</span>
                 <p className="text-[#00040a] text-[12px] text-right">{r.wins}W · {r.trades - r.wins}L</p>
               </div>
               <div className="text-right">
