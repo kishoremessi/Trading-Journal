@@ -290,7 +290,6 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
       {selectedDay && selectedDaySegs.length > 0 && (
         <DayPopup dateStr={selectedDay} segments={selectedDaySegs} onClose={() => setSelectedDay(null)} />
       )}
-
       <div ref={calendarRef} className="bg-white border border-gray-200 rounded-xl p-3 space-y-2 shadow-sm">
         {/* Compact top bar: nav + month info + save in one row */}
         <div className="flex items-center gap-2">
@@ -429,7 +428,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
 
         {/* Month strip — inside the calendar card */}
         <div className="border-t border-gray-100 pt-3 mt-2">
-          <div className="flex gap-1.5 flex-wrap">
+          <div className="flex gap-1.5 flex-wrap justify-center items-start">
             {months.map((m, i) => (
               <button key={i} onClick={() => setMonthIdx(i)} data-testid={`button-month-${m.label}`}
                 className={`flex flex-col items-center px-2 py-1.5 rounded-lg text-xs transition-all ${
@@ -443,7 +442,6 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
           </div>
         </div>
       </div>
-
       {/* Monthly segment breakdown */}
       {monthSegs.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
