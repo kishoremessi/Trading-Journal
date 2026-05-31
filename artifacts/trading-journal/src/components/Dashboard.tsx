@@ -91,7 +91,7 @@ function ExpectancyBanner({ stats, year, month, filteredTrades }: {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div className="flex-1 min-w-0">
           <h2 className={`text-base font-bold mb-1 ${info.titleColor}`}>{info.emoji} {info.title}</h2>
-          <p className="text-sm text-gray-600 leading-relaxed">{info.body}</p>
+          <p className="text-sm leading-relaxed font-bold text-[#013894]">{info.body}</p>
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${info.badgeColor}`}>{info.badge}</span>
@@ -368,7 +368,7 @@ function CoreMetrics({ stats, trades }: { stats: TradeStats; trades: Trade[] }) 
             <p className={`text-3xl font-extrabold font-mono leading-none ${stats.totalPnl >= 0 ? 'text-green-600' : 'text-red-500'}`}>
               {formatPnl(stats.totalPnl)}
             </p>
-            <p className="text-[11px] text-gray-400 mt-1.5">{stats.totalTradingDays} trading days</p>
+            <p className="text-[11px] mt-1.5 font-bold text-[#0758e5]">{stats.totalTradingDays} trading days</p>
           </div>
 
           {/* Win Rate with bar */}
