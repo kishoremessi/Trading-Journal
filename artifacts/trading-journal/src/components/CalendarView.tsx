@@ -324,7 +324,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
               <span className="font-mono font-semibold text-green-500 text-[13px]">
                 ({fmtPct(currentMonth.returnPct)})
               </span>
-              <span className="text-[12px] text-[#00050d]">{currentMonth.winDays}W/{currentMonth.lossDays}L · {currentMonth.tradingDays}d · {lots}L</span>
+              <span className="text-[#00050d] font-bold text-[13px]">{currentMonth.winDays}W/{currentMonth.lossDays}L · {currentMonth.tradingDays}d · {lots}L</span>
               {currentMonth.maxDrawdown > 0 && (
                 <span className="text-[10px] font-mono font-bold text-red-600 bg-red-50 border border-red-300 rounded px-1.5 py-0.5">
                   DD {fmtFull(-currentMonth.maxDrawdown)} ({currentMonth.ddPct.toFixed(1)}%)
