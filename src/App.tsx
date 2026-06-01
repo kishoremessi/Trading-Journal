@@ -167,7 +167,7 @@ function AppContent() {
   const [showChangeFile, setShowChangeFile] = useState(false);
 
   const { data, loading, error, refetch } = useSheetData(sheetUrl);
-  const { localTrades } = useLocalTrades();
+  const { localTrades, refetchLocal } = useLocalTrades();
 
   // Merge Google Sheets trades with local Trade Book trades
   const mergedData = useMemo<AppData | null>(() => {
@@ -242,7 +242,7 @@ function AppContent() {
 
           <div className="flex items-center gap-2 shrink-0">
             {tab !== 'tradebook' && (
-              <button onClick={refetch} disabled={loading} data-testid="button-refresh"
+              <button onClick={() => { refetch(); refetchLocal(); }} disabled={loading} data-testid="button-refresh"
                 className="flex gap-1.5 hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all disabled:opacity-50 justify-center items-center text-[#1a8a1a] text-[13px] font-bold bg-[#edf5ef80]">
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />Refresh
               </button>
