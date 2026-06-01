@@ -411,7 +411,7 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
                         </div>
                         {/* Tax — bottom left */}
                         {tax !== undefined && tax !== 0 && (
-                          <div className="text-[8px] font-mono leading-none self-start font-bold text-[#043287]">
+                          <div className="font-mono self-start text-[#043287] text-[12px] font-extralight">
                             tax {fmtTax(tax)}
                           </div>
                         )}
