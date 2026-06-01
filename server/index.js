@@ -31,7 +31,8 @@ app.get('/api/trades', (req, res) => {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
     const dataRows = rows.slice(1).filter(r => r[2]);
-    const trades = dataRows.map(r => ({
+    const trades = dataRows.map((r, i) => ({
+      id: i,
       date: r[2] || '',
       segment: r[3] || '',
       qty: r[4] || 0,
@@ -83,6 +84,42 @@ app.post('/api/add-trade', (req, res) => {
     XLSX.writeFile(wb, XLSX_PATH);
 
     res.json({ success: true, message: 'Trade added successfully' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.delete('/api/trades/:index', (req, res) => {
+  try {
+    ensureFile();
+    const targetIdx = parseInt(req.params.index);
+
+    const wb = XLSX.readFile(XLSX_PATH);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+    const header = rows[0];
+    const dataRows = rows.slice(1);
+
+    // Find positions of valid (non-empty) trade rows
+    const validPositions = [];
+    for (let i = 0; i < dataRows.length; i++) {
+      if (dataRows[i][2]) validPositions.push(i);
+    }
+
+    if (targetIdx < 0 || targetIdx >= validPositions.length) {
+      return res.status(400).json({ success: false, error: 'Invalid trade index' });
+    }
+
+    // Remove that row
+    dataRows.splice(validPositions[targetIdx], 1);
+
+    const newRows = [header, ...dataRows];
+    const newWs = XLSX.utils.aoa_to_sheet(newRows);
+    wb.Sheets[wb.SheetNames[0]] = newWs;
+    XLSX.writeFile(wb, XLSX_PATH);
+
+    res.json({ success: true, message: 'Trade deleted successfully' });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }

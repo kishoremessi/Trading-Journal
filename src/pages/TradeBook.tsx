@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PlusCircle, CheckCircle2, XCircle, TrendingUp, TrendingDown, BookOpen, RefreshCw } from 'lucide-react';
+import { PlusCircle, CheckCircle2, XCircle, TrendingUp, TrendingDown, BookOpen, RefreshCw, Trash2 } from 'lucide-react';
 
 interface TradeFormState {
   date: string;
@@ -84,6 +84,7 @@ export default function TradeBook() {
   const [submitMsg, setSubmitMsg] = useState('');
   const [trades, setTrades] = useState<TradeRecord[]>([]);
   const [loadingTrades, setLoadingTrades] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const lots = parseFloat(form.lots) || 0;
   const lotSize = getLotSize(form.segment);
@@ -114,6 +115,19 @@ export default function TradeBook() {
   }, []);
 
   useEffect(() => { fetchTrades(); }, [fetchTrades]);
+
+  const handleDelete = useCallback(async (id: number) => {
+    try {
+      const res = await fetch(`/api/trades/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setConfirmDeleteId(null);
+        fetchTrades();
+      }
+    } catch {
+      // silent
+    }
+  }, [fetchTrades]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -367,13 +381,36 @@ export default function TradeBook() {
               {trades.map((t, i) => {
                 const ls = getLotSize(t.segment);
                 const lotsDisplay = ls ? Math.round(Number(t.qty) / ls) : Number(t.qty);
+                const isConfirming = confirmDeleteId === t.id;
                 return (
                   <div key={i} className="border border-border rounded-lg p-3 text-xs space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-foreground">{t.date} · {t.segment}</span>
-                      <span className={`font-bold ${Number(t.pnl) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {Number(t.pnl) >= 0 ? '+' : ''}{formatCurrency(Number(t.pnl))}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`font-bold ${Number(t.pnl) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {Number(t.pnl) >= 0 ? '+' : ''}{formatCurrency(Number(t.pnl))}
+                        </span>
+                        {isConfirming ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleDelete(t.id)}
+                              className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
+                            >Delete</button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            >Cancel</button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteId(t.id)}
+                            className="text-muted-foreground hover:text-red-400 transition-colors p-0.5 rounded"
+                            title="Delete this trade"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 text-muted-foreground">
                       <span>{lotsDisplay} lots ({t.qty} units)</span>
