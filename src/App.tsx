@@ -149,6 +149,12 @@ function useLocalTrades() {
 
   useEffect(() => { fetch_(); }, [fetch_, version]);
 
+  // Auto-refresh local trades every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => setVersion(v => v + 1), 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const refetch = useCallback(() => setVersion(v => v + 1), []);
   return { localTrades, refetchLocal: refetch };
 }
@@ -273,12 +279,10 @@ function AppContent() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {tab !== 'tradebook' && (
-              <button onClick={() => { refetch(); refetchLocal(); }} disabled={loading} data-testid="button-refresh"
-                className="flex gap-1.5 hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all disabled:opacity-50 justify-center items-center text-[#1a8a1a] text-[13px] font-bold bg-[#edf5ef80]">
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />Refresh
-              </button>
-            )}
+            <button onClick={() => { refetch(); refetchLocal(); }} disabled={loading} data-testid="button-refresh"
+              className="flex gap-1.5 hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all disabled:opacity-50 justify-center items-center text-[#1a8a1a] text-[13px] font-bold bg-[#edf5ef80]">
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />Refresh
+            </button>
             <button onClick={() => setShowChangeFile(true)} data-testid="button-change-file"
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all">
               <FileText className="w-3.5 h-3.5" />Change file
@@ -304,7 +308,7 @@ function AppContent() {
 
       <main className="max-w-5xl mx-auto px-4 py-6">
         {/* Trade Book tab — always available */}
-        {tab === 'tradebook' && <TradeBook />}
+        {tab === 'tradebook' && <TradeBook onTradeSaved={() => { refetch(); refetchLocal(); }} />}
 
         {/* Other tabs need data */}
         {tab !== 'tradebook' && loading && !displayData && (

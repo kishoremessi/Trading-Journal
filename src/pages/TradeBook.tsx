@@ -80,7 +80,11 @@ function yyyyMmDdToDdmmyyyy(yyyyMmDd: string): string {
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
 
-export default function TradeBook() {
+interface TradeBookProps {
+  onTradeSaved?: () => void;
+}
+
+export default function TradeBook({ onTradeSaved }: TradeBookProps) {
   const [form, setForm] = useState<TradeFormState>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -120,9 +124,9 @@ export default function TradeBook() {
     try {
       const res = await fetch(`/api/trades/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      if (data.success) { setConfirmDeleteId(null); fetchTrades(); }
+      if (data.success) { setConfirmDeleteId(null); fetchTrades(); onTradeSaved?.(); }
     } catch { /* silent */ }
-  }, [fetchTrades]);
+  }, [fetchTrades, onTradeSaved]);
 
   const handleEdit = useCallback((trade: TradeRecord) => {
     const ls = getLotSize(trade.segment);
@@ -183,13 +187,14 @@ export default function TradeBook() {
       setEditingId(null);
       setForm(emptyForm);
       fetchTrades();
+      onTradeSaved?.();
     } catch (err) {
       setSubmitStatus('error');
       setSubmitMsg(err instanceof Error ? err.message : 'Failed to update trade.');
     } finally {
       setSubmitting(false);
     }
-  }, [editingId, form, lots, actualQty, buy, sell, tax, points, pnl, profit, loss, result, fetchTrades]);
+  }, [editingId, form, lots, actualQty, buy, sell, tax, points, pnl, profit, loss, result, fetchTrades, onTradeSaved]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -240,6 +245,7 @@ export default function TradeBook() {
       setSubmitStatus('success');
       setSubmitMsg('Trade saved to Google Sheet! Hit Refresh on Dashboard to see it.');
       setForm(prev => ({ ...emptyForm, date: prev.date, segment: prev.segment }));
+      onTradeSaved?.();
     } catch (err) {
       setSubmitStatus('error');
       setSubmitMsg(err instanceof Error ? err.message : 'Failed to save trade.');

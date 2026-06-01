@@ -28,12 +28,14 @@ function toLocalDateStr(d: Date): string {
 }
 function getCapital(year: number, month: number): number {
   if (year === 2025 && month === 10) return 100000; // Nov 2025 = 2 lots = 100k
-  if (year > 2026 || (year === 2026 && month >= 3)) return 150000; // Mar 2026+ = 3 lots
+  if (year === 2026 && month >= 5) return 200000; // Jun 2026+ = 4 lots = 200k
+  if (year > 2026 || (year === 2026 && month >= 3)) return 150000; // Mar–May 2026 = 3 lots = 150k
   return 50000; // Default = 1 lot
 }
 function getLots(year: number, month: number): number {
   if (year === 2025 && month === 10) return 2; // Nov 2025 = 2 lots
-  if (year > 2026 || (year === 2026 && month >= 3)) return 3; // Mar 2026+ = 3 lots
+  if (year === 2026 && month >= 5) return 4; // Jun 2026+ = 4 lots
+  if (year > 2026 || (year === 2026 && month >= 3)) return 3; // Mar–May 2026 = 3 lots
   return 1; // Default = 1 lot
 }
 function fmtPct(pct: number): string {
