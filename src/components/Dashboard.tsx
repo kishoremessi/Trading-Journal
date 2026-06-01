@@ -9,7 +9,7 @@ import {
   formatPnl, formatPnlFull,
   computeStats, computeSegmentStats, computeGroupedSegments, computeDayPnl,
 } from '../lib/stats';
-import type { Historical2025, Trade } from '../lib/sheetParser';
+import type { Trade } from '../lib/sheetParser';
 import {
   getFilteredTrades, getAvailableYears, calculateEquityCurve,
   calculateDrawdowns, calculateMonthlyStats, calculatePredictiveMetrics,
@@ -22,7 +22,6 @@ interface Props {
   segments: SegmentStats[];
   groupedSegments: InstrumentGroup[];
   dayPnls: DayPnl[];
-  historical2025: Historical2025;
   trades: Trade[];
 }
 
@@ -444,7 +443,8 @@ const LOT_CAPITAL = 50000;
 // Returns the number of lots traded in a given month based on period
 function getHistoricalLots(year: number, month: number): number {
   if (year === 2025 && month === 10) return 2; // Nov 2025 = 2 lots
-  if (year > 2026 || (year === 2026 && month >= 2)) return 3; // Mar 2026+ = 3 lots
+  if (year > 2026 || (year === 2026 && month >= 5)) return 4; // Jun 2026+ = 4 lots
+  if (year === 2026 && month >= 2) return 3; // Mar–May 2026 = 3 lots
   return 1; // Default = 1 lot
 }
 
@@ -794,7 +794,7 @@ function MonthlyBreakdown({ trades }: { trades: Trade[] }) {
 }
 
 /* ── Dashboard Root ───────────────────────────────────────────── */
-export function Dashboard({ trades: allTrades, historical2025 }: Props) {
+export function Dashboard({ trades: allTrades }: Props) {
   const [year, setYear] = useState(() => { try { return localStorage.getItem('tj-filter-year') || 'all'; } catch { return 'all'; } });
   const [month, setMonth] = useState(() => { try { return localStorage.getItem('tj-filter-month') || 'all'; } catch { return 'all'; } });
 
