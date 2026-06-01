@@ -475,7 +475,7 @@ export default function TradeBook({ onTradeSaved }: TradeBookProps) {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 text-gray-400">
+                    <div className="flex items-center gap-3 text-[#00040a]">
                       <span className="text-gray-600">
                         {lotsDisplay} lots <span className="text-gray-400">({t.qty} units)</span>
                       </span>
