@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PlusCircle, CheckCircle2, XCircle, TrendingUp, TrendingDown, BookOpen, RefreshCw, Trash2 } from 'lucide-react';
+import { PlusCircle, CheckCircle2, XCircle, TrendingUp, TrendingDown, BookOpen, RefreshCw, Trash2, Pencil } from 'lucide-react';
 
 interface TradeFormState {
   date: string;
@@ -68,6 +68,18 @@ const inputCls =
 const labelCls =
   'block text-[11px] font-semibold text-gray-500 mb-1.5 uppercase tracking-wider';
 
+function ddmmyyyyToYyyyMmDd(ddmmyyyy: string): string {
+  const m = ddmmyyyy.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!m) return ddmmyyyy;
+  return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+}
+
+function yyyyMmDdToDdmmyyyy(yyyyMmDd: string): string {
+  const m = yyyyMmDd.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return yyyyMmDd;
+  return `${m[3]}-${m[2]}-${m[1]}`;
+}
+
 export default function TradeBook() {
   const [form, setForm] = useState<TradeFormState>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
@@ -76,6 +88,7 @@ export default function TradeBook() {
   const [trades, setTrades] = useState<TradeRecord[]>([]);
   const [loadingTrades, setLoadingTrades] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const lots     = parseFloat(form.lots) || 0;
   const lotSize  = getLotSize(form.segment);
@@ -110,6 +123,73 @@ export default function TradeBook() {
       if (data.success) { setConfirmDeleteId(null); fetchTrades(); }
     } catch { /* silent */ }
   }, [fetchTrades]);
+
+  const handleEdit = useCallback((trade: TradeRecord) => {
+    const ls = getLotSize(trade.segment);
+    const lotsDisplay = ls ? Math.round(Number(trade.qty) / ls) : Number(trade.qty);
+    setForm({
+      date: ddmmyyyyToYyyyMmDd(String(trade.date)),
+      segment: trade.segment,
+      lots: String(lotsDisplay),
+      buy: String(trade.buyPremium),
+      sell: String(trade.sellPremium),
+      tax: String(trade.tax),
+      rule: String(trade.ruleFollowed),
+    });
+    setEditingId(trade.id);
+    setSubmitStatus('idle');
+    setSubmitMsg('');
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setSubmitStatus('idle');
+    setSubmitMsg('');
+  }, []);
+
+  const handleUpdate = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId === null || !form.date || !form.segment || !lots) return;
+    setSubmitting(true);
+    setSubmitStatus('idle');
+
+    const payload = {
+      Date: yyyyMmDdToDdmmyyyy(form.date),
+      Segment: form.segment,
+      Quantity: actualQty,
+      BuyPremium: buy,
+      SellPremium: sell,
+      PointsDifference: points,
+      PnL: pnl,
+      Profit: profit,
+      Loss: loss,
+      Tax: tax,
+      RuleFollowed: form.rule,
+      Result: result,
+    };
+
+    try {
+      const res = await fetch(`/api/trades/${editingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Update failed');
+
+      setSubmitStatus('success');
+      setSubmitMsg('Trade updated successfully.');
+      setEditingId(null);
+      setForm(emptyForm);
+      fetchTrades();
+    } catch (err) {
+      setSubmitStatus('error');
+      setSubmitMsg(err instanceof Error ? err.message : 'Failed to update trade.');
+    } finally {
+      setSubmitting(false);
+    }
+  }, [editingId, form, lots, actualQty, buy, sell, tax, points, pnl, profit, loss, result, fetchTrades]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -185,9 +265,9 @@ export default function TradeBook() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
         {/* ── Entry Form ── */}
-        <form onSubmit={handleSubmit}
+        <form onSubmit={editingId !== null ? handleUpdate : handleSubmit}
           className="lg:col-span-3 bg-white border border-gray-200 rounded-xl p-5 space-y-4 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">New Entry</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{editingId !== null ? 'Edit Entry' : 'New Entry'}</p>
 
           <div className="grid grid-cols-2 gap-3">
 
@@ -297,12 +377,20 @@ export default function TradeBook() {
             </div>
           )}
 
-          <button type="submit" disabled={submitting || !form.date || !form.segment || !lots}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2.5 text-sm font-semibold disabled:opacity-40 transition-all">
-            {submitting
-              ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</>
-              : <><PlusCircle className="w-4 h-4" /> Add Trade</>}
-          </button>
+          <div className="flex gap-2">
+            <button type="submit" disabled={submitting || !form.date || !form.segment || !lots}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2.5 text-sm font-semibold disabled:opacity-40 transition-all">
+              {submitting
+                ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</>
+                : <>{editingId !== null ? <><Pencil className="w-4 h-4" /> Update Trade</> : <><PlusCircle className="w-4 h-4" /> Add Trade</>}</>}
+            </button>
+            {editingId !== null && (
+              <button type="button" onClick={cancelEdit}
+                className="flex items-center justify-center gap-1 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg py-2.5 text-sm font-semibold transition-all">
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
 
         {/* ── Recent Trades ── */}
@@ -365,11 +453,18 @@ export default function TradeBook() {
                             </button>
                           </div>
                         ) : (
-                          <button onClick={() => setConfirmDeleteId(t.id)}
-                            className="text-gray-300 hover:text-red-500 transition-colors p-0.5 rounded"
-                            title="Delete this trade">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleEdit(t)}
+                              className="text-gray-300 hover:text-blue-500 transition-colors p-0.5 rounded"
+                              title="Edit this trade">
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                            <button onClick={() => setConfirmDeleteId(t.id)}
+                              className="text-gray-300 hover:text-red-500 transition-colors p-0.5 rounded"
+                              title="Delete this trade">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>

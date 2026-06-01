@@ -25,6 +25,15 @@ function ensureFile() {
   }
 }
 
+// Convert any date format to DD-MM-YYYY for consistent storage & display
+function normalizeDate(str) {
+  const s = String(str || '').trim();
+  if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) return s;
+  const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return `${m[3].padStart(2, '0')}-${m[2].padStart(2, '0')}-${m[1]}`;
+  return s;
+}
+
 app.get('/api/trades', (req, res) => {
   try {
     ensureFile();
@@ -64,7 +73,7 @@ app.post('/api/add-trade', (req, res) => {
     const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
     const newRow = new Array(15).fill('');
-    newRow[2]  = trade.Date;
+    newRow[2]  = normalizeDate(trade.Date);
     newRow[3]  = trade.Segment;
     newRow[4]  = trade.Quantity;
     newRow[5]  = trade.BuyPremium;
@@ -121,6 +130,56 @@ app.delete('/api/trades/:index', (req, res) => {
     XLSX.writeFile(wb, XLSX_PATH);
 
     res.json({ success: true, message: 'Trade deleted successfully' });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.put('/api/trades/:index', (req, res) => {
+  try {
+    ensureFile();
+    const targetIdx = parseInt(req.params.index);
+    const trade = req.body;
+
+    const wb = XLSX.readFile(XLSX_PATH);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+    const header = rows[0];
+    const dataRows = rows.slice(1);
+
+    const validPositions = [];
+    for (let i = 0; i < dataRows.length; i++) {
+      if (dataRows[i][2]) validPositions.push(i);
+    }
+
+    if (targetIdx < 0 || targetIdx >= validPositions.length) {
+      return res.status(400).json({ success: false, error: 'Invalid trade index' });
+    }
+
+    const updatedRow = new Array(15).fill('');
+    updatedRow[2]  = normalizeDate(trade.Date);
+    updatedRow[3]  = trade.Segment;
+    updatedRow[4]  = trade.Quantity;
+    updatedRow[5]  = trade.BuyPremium;
+    updatedRow[6]  = trade.SellPremium;
+    updatedRow[7]  = trade.PointsDifference;
+    updatedRow[8]  = trade.Profit;
+    updatedRow[9]  = trade.Loss;
+    updatedRow[10] = trade.Tax;
+    updatedRow[11] = trade.RuleFollowed;
+    updatedRow[12] = '';
+    updatedRow[13] = trade.PnL;
+    updatedRow[14] = 0;
+
+    dataRows[validPositions[targetIdx]] = updatedRow;
+
+    const newRows = [header, ...dataRows];
+    const newWs = XLSX.utils.aoa_to_sheet(newRows);
+    wb.Sheets[wb.SheetNames[0]] = newWs;
+    XLSX.writeFile(wb, XLSX_PATH);
+
+    res.json({ success: true, message: 'Trade updated successfully' });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }

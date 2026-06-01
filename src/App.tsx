@@ -33,17 +33,49 @@ const MONTH_MAP: Record<string, number> = {
   jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
 };
 
+function parseDDMMYYYY(dateStr: string): { date: Date; dateStr: string } | null {
+  const s = dateStr.trim();
+  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10) - 1; // 0-based
+  const year = parseInt(m[3], 10);
+  const d = new Date(year, month, day);
+  if (d.getMonth() !== month || d.getDate() !== day) return null;
+  return { date: d, dateStr: toLocalDateStr(d) };
+}
+
 function convertLocalTrades(apiTrades: Array<Record<string, unknown>>): Trade[] {
-  const year = new Date().getFullYear();
   return apiTrades.map(t => {
-    const parts = String(t.date || '').split('-');
+    const dateStrRaw = String(t.date || '');
+    const parsed = parseDDMMYYYY(dateStrRaw);
+    if (parsed) {
+      return {
+        date: parsed.date,
+        dateStr: parsed.dateStr,
+        segment: String(t.segment || ''),
+        qty: Number(t.qty) || 0,
+        buy: Number(t.buyPremium) || 0,
+        sell: Number(t.sellPremium) || 0,
+        points: Number(t.points) || 0,
+        profit: Number(t.profit) || 0,
+        loss: Number(t.loss) || 0,
+        tax: Number(t.tax) || 0,
+        rulesFollowed: String(t.ruleFollowed).toLowerCase() === 'yes',
+        reason: '',
+        actualProfit: Number(t.pnl) || 0,
+        missedProfits: 0,
+      };
+    }
+    // Fallback for old month-name format (e.g. 01-Jun-2026)
+    const parts = dateStrRaw.split('-');
     const day = parseInt(parts[0]) || 1;
     const monthIdx = MONTH_MAP[parts[1]?.toLowerCase()?.substring(0, 3) ?? ''] ?? 0;
+    const year = parseInt(parts[2]) || new Date().getFullYear();
     const date = new Date(year, monthIdx, day);
-    const dateStr = toLocalDateStr(date);
     return {
       date,
-      dateStr,
+      dateStr: toLocalDateStr(date),
       segment: String(t.segment || ''),
       qty: Number(t.qty) || 0,
       buy: Number(t.buyPremium) || 0,
