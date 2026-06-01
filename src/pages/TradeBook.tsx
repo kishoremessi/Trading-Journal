@@ -661,7 +661,7 @@ export default function TradeBook({ onTradeSaved }: TradeBookProps) {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleEdit(t)}
-                              className="text-gray-300 hover:text-blue-500 transition-colors p-0.5 rounded"
+                              className="hover:text-blue-500 transition-colors p-0.5 rounded text-[#b00b9d]"
                               title="Edit this trade"
                             >
                               <Pencil className="w-3 h-3" />
