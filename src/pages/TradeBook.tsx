@@ -26,7 +26,7 @@ interface TradeRecord {
   result: string;
 }
 
-const SEGMENTS = ['NIFTY CE', 'NIFTY PE', 'BANKNIFTY CE', 'BANKNIFTY PE', 'FINNIFTY CE', 'FINNIFTY PE', 'STOCKS'];
+const SEGMENTS = ['NiftyCE', 'NiftyPE', 'BankniftyCE', 'BankniftyPE', 'Sensex CE', 'Sensex PE', 'NiftyBullCE', 'NiftyBullPE', 'SensexBullCE', 'SensexBullPE'];
 
 function formatDateToDDMMM(dateStr: string): string {
   if (!dateStr) return '';
