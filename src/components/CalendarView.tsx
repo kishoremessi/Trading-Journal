@@ -401,11 +401,11 @@ export function CalendarView({ dayPnls, trades = [] }: Props) {
                     {hasData ? (
                       <>
                         {/* P&L + (%) centered */}
-                        <div className="flex-1 flex flex-col items-center justify-center gap-0.5">
+                        <div className="flex-1 flex gap-[26px] justify-center items-center flex-row">
                           <div className={`text-sm font-bold font-mono leading-none text-center ${isDayProfit ? 'text-green-700' : 'text-red-600'}`}>
                             {fmtFull(pnl!)}
                           </div>
-                          <div className={`text-[10px] font-mono font-semibold underline leading-none ${isDayProfit ? 'text-green-500' : isDayLoss && Math.abs(returnPct) > 5 ? 'text-orange-600' : 'text-red-400'}`}>
+                          <div className={`font-mono underline text-[13px] font-light ${isDayProfit ? 'text-green-500' : isDayLoss && Math.abs(returnPct) > 5 ? 'text-orange-600' : 'text-red-400'}`}>
                             ({fmtPct(returnPct)})
                           </div>
                         </div>
