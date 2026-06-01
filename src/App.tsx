@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { RefreshCw, FileText, LayoutDashboard, BarChart3, Calendar, X, Check, BookOpen } from 'lucide-react';
 import Papa from 'papaparse';
-import { parseCsv, buildCsvUrl, Trade, parse2025Data, Historical2025 } from './lib/sheetParser';
+import { parseCsv, buildCsvUrl, Trade, parse2025Data, Historical2025, toLocalDateStr } from './lib/sheetParser';
 import { computeStats, computeSegmentStats, computeDayPnl, computeGroupedSegments, TradeStats, SegmentStats, DayPnl, InstrumentGroup } from './lib/stats';
 import { Dashboard } from './components/Dashboard';
 import { Segments } from './components/Segments';
@@ -26,6 +26,38 @@ interface AppData {
   historical2025: Historical2025;
   loadedAt: Date;
   totalDays: number;
+}
+
+const MONTH_MAP: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+};
+
+function convertLocalTrades(apiTrades: Array<Record<string, unknown>>): Trade[] {
+  const year = new Date().getFullYear();
+  return apiTrades.map(t => {
+    const parts = String(t.date || '').split('-');
+    const day = parseInt(parts[0]) || 1;
+    const monthIdx = MONTH_MAP[parts[1]?.toLowerCase()?.substring(0, 3) ?? ''] ?? 0;
+    const date = new Date(year, monthIdx, day);
+    const dateStr = toLocalDateStr(date);
+    return {
+      date,
+      dateStr,
+      segment: String(t.segment || ''),
+      qty: Number(t.qty) || 0,
+      buy: Number(t.buyPremium) || 0,
+      sell: Number(t.sellPremium) || 0,
+      points: Number(t.points) || 0,
+      profit: Number(t.profit) || 0,
+      loss: Number(t.loss) || 0,
+      tax: Number(t.tax) || 0,
+      rulesFollowed: String(t.ruleFollowed).toLowerCase() === 'yes',
+      reason: '',
+      actualProfit: Number(t.pnl) || 0,
+      missedProfits: 0,
+    };
+  });
 }
 
 function useSheetData(url: string) {
@@ -63,6 +95,30 @@ function useSheetData(url: string) {
 
   useEffect(() => { fetch_(url); }, [url, fetch_]);
   return { data, loading, error, refetch: () => fetch_(url) };
+}
+
+function useLocalTrades() {
+  const [localTrades, setLocalTrades] = useState<Trade[]>([]);
+  const [version, setVersion] = useState(0);
+
+  const fetch_ = useCallback(async () => {
+    try {
+      const res = await fetch('/api/trades');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.trades) && json.trades.length > 0) {
+        setLocalTrades(convertLocalTrades(json.trades));
+      } else {
+        setLocalTrades([]);
+      }
+    } catch {
+      // backend may not be running
+    }
+  }, []);
+
+  useEffect(() => { fetch_(); }, [fetch_, version]);
+
+  const refetch = useCallback(() => setVersion(v => v + 1), []);
+  return { localTrades, refetchLocal: refetch };
 }
 
 function ChangeFileModal({ onConfirm, onClose }: { onConfirm: (url: string) => void; onClose: () => void }) {
@@ -111,6 +167,29 @@ function AppContent() {
   const [showChangeFile, setShowChangeFile] = useState(false);
 
   const { data, loading, error, refetch } = useSheetData(sheetUrl);
+  const { localTrades } = useLocalTrades();
+
+  // Merge Google Sheets trades with local Trade Book trades
+  const mergedData = useMemo<AppData | null>(() => {
+    if (!data) return null;
+    if (!localTrades.length) return data;
+
+    const allTrades = [...data.trades, ...localTrades].sort((a, b) => a.date.getTime() - b.date.getTime());
+    const stats = computeStats(allTrades);
+    const segments = computeSegmentStats(allTrades);
+    const groupedSegments = computeGroupedSegments(allTrades);
+    const dayPnls = computeDayPnl(allTrades);
+
+    return {
+      ...data,
+      trades: allTrades,
+      stats,
+      segments,
+      groupedSegments,
+      dayPnls,
+      totalDays: stats.totalTradingDays,
+    };
+  }, [data, localTrades]);
 
   const handleChangeFile = (url: string) => {
     const csvUrl = buildCsvUrl(url);
@@ -125,6 +204,8 @@ function AppContent() {
     { id: 'tradebook',  label: 'Trade Book', icon: BookOpen },
   ];
 
+  const displayData = mergedData;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-30">
@@ -136,8 +217,8 @@ function AppContent() {
             <div className="min-w-0">
               <h1 className="text-sm font-semibold text-foreground truncate">Trading Journal - Kishore</h1>
               <p className="text-xs text-muted-foreground truncate">
-                {loading ? 'Loading...' : data
-                  ? `Google Sheets · ${data.totalDays} trading days · updated ${data.loadedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                {loading ? 'Loading...' : displayData
+                  ? `${displayData.totalDays} trading days · ${localTrades.length > 0 ? `+${localTrades.length} local trades · ` : ''}updated ${displayData.loadedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                   : error ? 'Error loading data' : 'No data'}
               </p>
             </div>
@@ -194,7 +275,7 @@ function AppContent() {
         {tab === 'tradebook' && <TradeBook />}
 
         {/* Other tabs need data */}
-        {tab !== 'tradebook' && loading && !data && (
+        {tab !== 'tradebook' && loading && !displayData && (
           <div className="flex items-center justify-center py-32">
             <div className="text-center space-y-3">
               <RefreshCw className="w-8 h-8 animate-spin text-primary mx-auto" />
@@ -202,7 +283,7 @@ function AppContent() {
             </div>
           </div>
         )}
-        {tab !== 'tradebook' && error && !data && (
+        {tab !== 'tradebook' && error && !displayData && (
           <div className="flex items-center justify-center py-32">
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 max-w-md text-center">
               <p className="text-sm font-semibold text-red-400 mb-2">Failed to load data</p>
@@ -214,23 +295,23 @@ function AppContent() {
             </div>
           </div>
         )}
-        {tab !== 'tradebook' && data && (
+        {tab !== 'tradebook' && displayData && (
           <>
             {tab === 'dashboard' && (
               <Dashboard
-                stats={data.stats}
-                segments={data.segments}
-                groupedSegments={data.groupedSegments}
-                dayPnls={data.dayPnls}
-                historical2025={data.historical2025}
-                trades={data.trades}
+                stats={displayData.stats}
+                segments={displayData.segments}
+                groupedSegments={displayData.groupedSegments}
+                dayPnls={displayData.dayPnls}
+                historical2025={displayData.historical2025}
+                trades={displayData.trades}
               />
             )}
             {tab === 'segments' && (
-              <Segments segments={data.segments} groupedSegments={data.groupedSegments} trades={data.trades} />
+              <Segments segments={displayData.segments} groupedSegments={displayData.groupedSegments} trades={displayData.trades} />
             )}
             {tab === 'calendar' && (
-              <CalendarView dayPnls={data.dayPnls} trades={data.trades} />
+              <CalendarView dayPnls={displayData.dayPnls} trades={displayData.trades} />
             )}
           </>
         )}
