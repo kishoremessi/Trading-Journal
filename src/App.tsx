@@ -1,20 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
-import { RefreshCw, FileText, LayoutDashboard, BarChart3, Calendar, X, Check } from 'lucide-react';
+import { RefreshCw, FileText, LayoutDashboard, BarChart3, Calendar, X, Check, BookOpen } from 'lucide-react';
 import Papa from 'papaparse';
 import { parseCsv, buildCsvUrl, Trade, parse2025Data, Historical2025 } from './lib/sheetParser';
 import { computeStats, computeSegmentStats, computeDayPnl, computeGroupedSegments, TradeStats, SegmentStats, DayPnl, InstrumentGroup } from './lib/stats';
 import { Dashboard } from './components/Dashboard';
 import { Segments } from './components/Segments';
 import { CalendarView } from './components/CalendarView';
+import TradeBook from './pages/TradeBook';
 
 const queryClient = new QueryClient();
 
 const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1S0daWgmjoNE1QMjhrPBUw6j0XWnJVLbw/export?format=csv&gid=1018221512';
 const STORAGE_KEY = 'trading-journal-sheet-url';
 
-type Tab = 'dashboard' | 'segments' | 'calendar';
+type Tab = 'dashboard' | 'segments' | 'calendar' | 'tradebook';
 
 interface AppData {
   trades: Trade[];
@@ -118,9 +119,10 @@ function AppContent() {
   };
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof LayoutDashboard }> = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'segments',  label: 'Segments',  icon: BarChart3 },
-    { id: 'calendar',  label: 'Calendar',  icon: Calendar },
+    { id: 'dashboard',  label: 'Dashboard',  icon: LayoutDashboard },
+    { id: 'segments',   label: 'Segments',   icon: BarChart3 },
+    { id: 'calendar',   label: 'Calendar',   icon: Calendar },
+    { id: 'tradebook',  label: 'Trade Book', icon: BookOpen },
   ];
 
   return (
@@ -146,7 +148,11 @@ function AppContent() {
               const Icon = t.icon;
               return (
                 <button key={t.id} onClick={() => setTab(t.id)} data-testid={`tab-${t.id}`}
-                  className="flex gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-card shadow-sm justify-center items-center text-[#00040d]">
+                  className={`flex gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all justify-center items-center ${
+                    tab === t.id
+                      ? 'bg-card shadow-sm text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}>
                   <Icon className="w-3.5 h-3.5" />{t.label}
                 </button>
               );
@@ -154,10 +160,12 @@ function AppContent() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <button onClick={refetch} disabled={loading} data-testid="button-refresh"
-              className="flex gap-1.5 hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all disabled:opacity-50 justify-center items-center text-[#1a8a1a] text-[13px] font-bold bg-[#edf5ef80]">
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />Refresh
-            </button>
+            {tab !== 'tradebook' && (
+              <button onClick={refetch} disabled={loading} data-testid="button-refresh"
+                className="flex gap-1.5 hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all disabled:opacity-50 justify-center items-center text-[#1a8a1a] text-[13px] font-bold bg-[#edf5ef80]">
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />Refresh
+              </button>
+            )}
             <button onClick={() => setShowChangeFile(true)} data-testid="button-change-file"
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5 hover:bg-muted/50 transition-all">
               <FileText className="w-3.5 h-3.5" />Change file
@@ -165,12 +173,13 @@ function AppContent() {
           </div>
         </div>
 
-        <div className="sm:hidden border-t border-border flex">
+        {/* Mobile nav */}
+        <div className="sm:hidden border-t border-border flex overflow-x-auto">
           {tabs.map(t => {
             const Icon = t.icon;
             return (
               <button key={t.id} onClick={() => setTab(t.id)} data-testid={`tab-mobile-${t.id}`}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all whitespace-nowrap px-2 ${
                   tab === t.id ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
                 }`}>
                 <Icon className="w-3.5 h-3.5" />{t.label}
@@ -179,8 +188,13 @@ function AppContent() {
           })}
         </div>
       </header>
+
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {loading && !data && (
+        {/* Trade Book tab — always available */}
+        {tab === 'tradebook' && <TradeBook />}
+
+        {/* Other tabs need data */}
+        {tab !== 'tradebook' && loading && !data && (
           <div className="flex items-center justify-center py-32">
             <div className="text-center space-y-3">
               <RefreshCw className="w-8 h-8 animate-spin text-primary mx-auto" />
@@ -188,7 +202,7 @@ function AppContent() {
             </div>
           </div>
         )}
-        {error && !data && (
+        {tab !== 'tradebook' && error && !data && (
           <div className="flex items-center justify-center py-32">
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 max-w-md text-center">
               <p className="text-sm font-semibold text-red-400 mb-2">Failed to load data</p>
@@ -200,7 +214,7 @@ function AppContent() {
             </div>
           </div>
         )}
-        {data && (
+        {tab !== 'tradebook' && data && (
           <>
             {tab === 'dashboard' && (
               <Dashboard
@@ -221,6 +235,7 @@ function AppContent() {
           </>
         )}
       </main>
+
       {showChangeFile && (
         <ChangeFileModal onConfirm={handleChangeFile} onClose={() => setShowChangeFile(false)} />
       )}

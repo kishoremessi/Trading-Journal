@@ -1,0 +1,82 @@
+Upgrade the existing trading journal app to support full Trade Book entry with persistent XLSX file writing.
+
+CURRENT SYSTEM:
+- React + Vite frontend
+- Dashboard reads trades from a local XLSX file (via parser)
+- Data is displayed via CSV/XLSX parsing (read-only currently)
+
+GOAL:
+Add a Trade Book feature that allows users to input trades and automatically APPEND them as a NEW ROW in the existing XLSX file without deleting or modifying old data.
+
+---
+
+FEATURES TO BUILD:
+
+1. Trade Book UI (React page in src/pages/TradeBook.tsx):
+   - Date (date input or dropdown)
+   - Segment (dropdown: NIFTY, BANKNIFTY, FINNIFTY, STOCKS)
+   - Quantity (number)
+   - Buy Premium (number)
+   - Sell Premium (number)
+   - Tax (manual input)
+   - Rule Followed (Yes/No dropdown)
+
+2. Auto Calculations (frontend before submit):
+   - Points Difference = Sell Premium - Buy Premium
+   - PnL = Points Difference × Quantity
+   - If PnL > 0 → Profit = PnL, Result = "Target Hit"
+   - If PnL < 0 → Loss = absolute value, Result = "Stop Loss Hit"
+
+---
+
+3. BACKEND (IMPORTANT - MUST CREATE):
+Create a Node.js/Express server inside Replit:
+
+- Endpoint: POST /add-trade
+- It should:
+  a. Read existing trades.xlsx file
+  b. Convert sheet to JSON
+  c. Append new trade as next row (DO NOT overwrite existing data)
+  d. Write back updated XLSX file safely
+
+Use libraries:
+- express
+- xlsx
+- cors
+- body-parser or express.json()
+
+---
+
+4. FRONTEND CONNECTION:
+- TradeBook page should send POST request to /add-trade
+- Send calculated trade object:
+  {
+    Date,
+    Segment,
+    Quantity,
+    BuyPremium,
+    SellPremium,
+    PointsDifference,
+    PnL,
+    Profit,
+    Loss,
+    Tax,
+    Result
+  }
+
+---
+
+5. CRITICAL RULES:
+- NEVER overwrite existing XLSX data
+- ALWAYS append as next row
+- Maintain same column structure as existing dashboard parser
+- Ensure dashboard updates automatically after refresh (no breaking changes)
+- Keep existing dashboard, segments, and calendar intact
+
+---
+
+6. OUTPUT REQUIREMENTS:
+- Working Trade Book tab in UI
+- Working backend API
+- XLSX file updated with each trade entry
+- Existing dashboard continues reading updated file
