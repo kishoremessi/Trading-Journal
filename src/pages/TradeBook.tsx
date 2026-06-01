@@ -668,7 +668,7 @@ export default function TradeBook({ onTradeSaved }: TradeBookProps) {
                             </button>
                             <button
                               onClick={() => setConfirmDeleteId(t.id)}
-                              className="text-gray-300 hover:text-red-500 transition-colors p-0.5 rounded"
+                              className="hover:text-red-500 transition-colors p-0.5 rounded text-[#03348a]"
                               title="Delete this trade"
                             >
                               <Trash2 className="w-3 h-3" />
