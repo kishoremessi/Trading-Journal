@@ -4,6 +4,7 @@ import XLSX from 'xlsx';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import https from 'https';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const XLSX_PATH = path.join(__dirname, 'trades.xlsx');
@@ -123,6 +124,56 @@ app.delete('/api/trades/:index', (req, res) => {
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }
+});
+
+// Proxy POST to Google Apps Script (avoids browser CORS)
+app.post('/api/save-to-sheets', (req, res) => {
+  const GSHEET_URL = 'https://script.google.com/macros/s/AKfycbxkltV-uMQx9mIKzvSIOh_5G7f0i03_IqJfD0xYFLWtN_veaVQGqd9SRZ4BXIVzUM362A/exec';
+  const body = JSON.stringify(req.body);
+
+  const urlObj = new URL(GSHEET_URL);
+  const options = {
+    hostname: urlObj.hostname,
+    path: urlObj.pathname + urlObj.search,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body),
+    },
+    // follow redirects: Google Apps Script returns a 302 on POST
+  };
+
+  function doRequest(opts, redirectCount = 0) {
+    const reqOut = https.request(opts, (resp) => {
+      // Google Apps Script often redirects POST → GET after execution
+      if ((resp.statusCode === 301 || resp.statusCode === 302) && resp.headers.location && redirectCount < 5) {
+        const loc = new URL(resp.headers.location);
+        doRequest({
+          hostname: loc.hostname,
+          path: loc.pathname + loc.search,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(body),
+          },
+        }, redirectCount + 1);
+        resp.resume();
+        return;
+      }
+      let data = '';
+      resp.on('data', chunk => { data += chunk; });
+      resp.on('end', () => {
+        res.json({ success: true, status: resp.statusCode, response: data });
+      });
+    });
+    reqOut.on('error', (err) => {
+      res.status(500).json({ success: false, error: err.message });
+    });
+    reqOut.write(body);
+    reqOut.end();
+  }
+
+  doRequest(options);
 });
 
 const PORT = 3001;
