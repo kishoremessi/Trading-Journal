@@ -170,7 +170,7 @@ export default function TradeBook({ onTradeSaved }: TradeBookProps) {
   const handleEdit = useCallback((trade: TradeRecord) => {
     const ls = getLotSize(trade.segment);
     const lotsDisplay = ls
-      ? Math.round(Number(trade.qty) / ls)
+      ? Number(trade.qty) / ls
       : Number(trade.qty);
     setForm({
       date: ddmmyyyyToYyyyMmDd(String(trade.date)),
@@ -612,7 +612,7 @@ export default function TradeBook({ onTradeSaved }: TradeBookProps) {
               {trades.map((t, i) => {
                 const ls = getLotSize(t.segment);
                 const lotsDisplay = ls
-                  ? Math.round(Number(t.qty) / ls)
+                  ? Number(t.qty) / ls
                   : Number(t.qty);
                 const isConfirming = confirmDeleteId === t.id;
                 const isProfit = Number(t.pnl) >= 0;
